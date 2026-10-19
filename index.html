@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Monitoring Progress Action Plan</title>
+    <title>Sistem Monitoring Progress Action Plan (Hierarki Sub Pekerjaan)</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome CDN -->
@@ -48,11 +48,19 @@
         /* Sticky Left Column Identifiers */
         .sticky-col-1 { position: sticky; left: 0; z-index: 20; background-color: inherit; }
         .sticky-col-2 { position: sticky; left: 48px; z-index: 20; background-color: inherit; }
-        .sticky-col-3 { position: sticky; left: 240px; z-index: 20; background-color: inherit; }
+        .sticky-col-3 { position: sticky; left: 280px; z-index: 20; background-color: inherit; }
+        
+        /* Subtask Indentation Visual */
+        .subtask-row {
+            background-color: #f8fafc;
+        }
+        .subtask-row:hover {
+            background-color: #f1f5f9;
+        }
         
         /* Print Styles */
         @media print {
-            body { background: white !important; color: black !important; font-size: 11px; }
+            body { background: white !important; color: black !important; font-size: 10px; }
             .no-print, sidebar, nav, .btn-action, button, .filter-bar { display: none !important; }
             main { margin: 0 !important; padding: 0 !important; width: 100% !important; }
             .print-only { display: block !important; }
@@ -147,7 +155,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
                         <div>
-                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Action Plan</span>
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Pekerjaan Utama</span>
                             <div id="kpi-total-plans" class="text-2xl font-bold text-slate-800 mt-1">0 Pekerjaan</div>
                             <span id="kpi-total-weight" class="text-xs text-primary-600 font-medium">100% Target Bobot</span>
                         </div>
@@ -193,7 +201,7 @@
                 <!-- Status Breakdown Badges Card -->
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
                     <div class="flex items-center gap-2">
-                        <span class="text-xs font-bold text-slate-500 uppercase">Status Pekerjaan:</span>
+                        <span class="text-xs font-bold text-slate-500 uppercase">Status Pekerjaan Utama:</span>
                     </div>
                     <div class="flex flex-wrap items-center gap-3 text-xs font-medium">
                         <span class="px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
@@ -230,9 +238,9 @@
                     <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
                         <div class="flex items-center justify-between">
                             <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
-                                <i class="fa-solid fa-chart-pie text-emerald-600"></i> Distribusi Status Action Plan
+                                <i class="fa-solid fa-chart-pie text-emerald-600"></i> Distribusi Status Pekerjaan
                             </h3>
-                            <span class="text-xs text-slate-400">Kategori Pekerjaan</span>
+                            <span class="text-xs text-slate-400">Kategori Utama</span>
                         </div>
                         <div class="h-64 relative flex items-center justify-center">
                             <canvas id="chart-status-pie"></canvas>
@@ -275,12 +283,15 @@
                         <span class="text-xs font-bold bg-primary-50 text-primary-700 px-3 py-1.5 rounded-lg border border-primary-200 flex items-center gap-1.5">
                             <i class="fa-solid fa-calendar text-primary-500"></i> Periode: <span id="lbl-rencana-period">Januari 2026</span>
                         </span>
-                        <input type="text" id="search-rencana" onkeyup="renderRencanaTable()" placeholder="Cari Nama / Satuan Action Plan..." class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 w-48 sm:w-64">
+                        <input type="text" id="search-rencana" onkeyup="renderRencanaTable()" placeholder="Cari Nama Pekerjaan / Sub..." class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 w-48 sm:w-64">
                     </div>
 
                     <div class="flex items-center gap-2">
+                        <button onclick="toggleExpandAllPlanRows()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition flex items-center gap-1">
+                            <i class="fa-solid fa-folder-tree"></i> <span id="btn-expand-all-text">Buka/Tutup Sub Pekerjaan</span>
+                        </button>
                         <button onclick="openPlanModal()" class="px-3.5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-plus"></i> Tambah Action Plan
+                            <i class="fa-solid fa-plus"></i> Tambah Action Plan Utama
                         </button>
                         <button onclick="addWeekToCurrentPeriod()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
                             <i class="fa-solid fa-calendar-plus"></i> + Tambah Minggu
@@ -291,24 +302,24 @@
                     </div>
                 </div>
 
-                <!-- Matrix Table Container (Horizontal Dynamic Weeks) -->
+                <!-- Matrix Table Container (Horizontal Dynamic Weeks & Hierarchical Rows) -->
                 <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
                     <div class="table-matrix-container overflow-x-auto max-h-[600px]">
                         <table class="w-full text-left text-xs border-collapse">
                             <!-- Multi-level Grouped Header -->
                             <thead class="bg-slate-800 text-white sticky top-0 z-30">
                                 <tr id="rencana-header-row-1">
-                                    <!-- Row 1: Identifiers & Dynamic Weeks Headers populated by JS -->
+                                    <!-- Row 1 populated by JS -->
                                 </tr>
                                 <tr id="rencana-header-row-2" class="bg-slate-700 text-slate-200 text-[11px]">
-                                    <!-- Row 2: Sub-columns (Vol, Jumlah, Bobot) populated by JS -->
+                                    <!-- Row 2 populated by JS -->
                                 </tr>
                             </thead>
                             <tbody id="rencana-table-body" class="divide-y divide-slate-200 bg-white">
-                                <!-- Data rows rendered dynamically -->
+                                <!-- Data rows with Parent & Subtasks -->
                             </tbody>
                             <tfoot id="rencana-table-foot" class="bg-slate-100 font-bold border-t-2 border-slate-300 text-slate-800 sticky bottom-0 z-20">
-                                <!-- Foot totals rendered dynamically -->
+                                <!-- Foot totals -->
                             </tfoot>
                         </table>
                     </div>
@@ -323,7 +334,7 @@
                         <span class="text-xs font-bold bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1.5">
                             <i class="fa-solid fa-calendar text-emerald-500"></i> Periode: <span id="lbl-realisasi-period">Januari 2026</span>
                         </span>
-                        <input type="text" id="search-realisasi" onkeyup="renderRealisasiTable()" placeholder="Cari Realisasi Action Plan..." class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 w-48 sm:w-64">
+                        <input type="text" id="search-realisasi" onkeyup="renderRealisasiTable()" placeholder="Cari Realisasi Pekerjaan..." class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 w-48 sm:w-64">
                     </div>
 
                     <div class="flex items-center gap-2">
@@ -364,9 +375,12 @@
                         <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
                             <i class="fa-solid fa-file-invoice text-primary-600"></i> Resume Action Plan — <span id="lbl-resume-active-period">Maret 2026</span>
                         </h3>
-                        <p class="text-xs text-slate-500">Rincian item pekerjaan, perbandingan Rencana vs Realisasi mingguan, serta evaluasi otomatis.</p>
+                        <p class="text-xs text-slate-500">Rincian item pekerjaan utama beserta sub pekerjaannya dan evaluasi mingguan.</p>
                     </div>
                     <div class="flex items-center gap-2">
+                        <button onclick="toggleResumeSubtasksView()" id="btn-toggle-resume-subtasks" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition flex items-center gap-1">
+                            <i class="fa-solid fa-sitemap"></i> Tampilkan Sub Pekerjaan
+                        </button>
                         <button onclick="exportResumeExcel()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1">
                             <i class="fa-solid fa-file-excel"></i> Ekspor Excel
                         </button>
@@ -424,20 +438,20 @@
                         </div>
                     </div>
 
-                    <!-- 2. RINCIAN ITEM PEKERJAAN -->
+                    <!-- 2. RINCIAN ITEM PEKERJAAN & SUB PEKERJAAN -->
                     <div class="space-y-3">
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-                                <i class="fa-solid fa-list text-primary-600"></i> 2. Rincian Item Pekerjaan (Bulanan)
+                                <i class="fa-solid fa-list text-primary-600"></i> 2. Rincian Pekerjaan Utama & Sub Pekerjaan
                             </h4>
-                            <input type="text" id="search-resume-items" onkeyup="renderResumeItemsTable()" placeholder="Cari Item Pekerjaan..." class="px-2.5 py-1 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 no-print w-48">
+                            <input type="text" id="search-resume-items" onkeyup="renderResumeItemsTable()" placeholder="Cari Item / Sub Pekerjaan..." class="px-2.5 py-1 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 no-print w-48">
                         </div>
                         <div class="overflow-x-auto border border-slate-200 rounded-xl">
                             <table class="w-full text-left text-xs">
                                 <thead class="bg-slate-800 text-white font-semibold">
                                     <tr>
                                         <th class="p-2.5 text-center w-10 border-r border-slate-700">No.</th>
-                                        <th class="p-2.5 border-r border-slate-700 min-w-[200px]">Nama Action Plan</th>
+                                        <th class="p-2.5 border-r border-slate-700 min-w-[220px]">Nama Pekerjaan / Sub Pekerjaan</th>
                                         <th class="p-2.5 text-center border-r border-slate-700 w-16">Satuan</th>
                                         <th class="p-2.5 text-center border-r border-slate-700">Vol Rencana</th>
                                         <th class="p-2.5 text-center border-r border-slate-700">Vol Realisasi</th>
@@ -586,39 +600,39 @@
         </div>
     </main>
 
-    <!-- MODAL FORM PLAN (ADD/EDIT ACTION PLAN) -->
+    <!-- MODAL FORM PLAN (ADD/EDIT ACTION PLAN & SUBTASKS) -->
     <div id="plan-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[92vh]">
             <div class="px-6 py-4 bg-slate-800 text-white flex justify-between items-center">
-                <h3 id="plan-modal-title" class="font-bold text-sm">Tambah Action Plan Baru</h3>
+                <h3 id="plan-modal-title" class="font-bold text-sm">Tambah Action Plan Utama Baru</h3>
                 <button onclick="closePlanModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
             </div>
             
-            <form id="plan-form" onsubmit="savePlanModal(event)" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs">
+            <form id="plan-form" onsubmit="savePlanModal(event)" class="p-6 space-y-5 overflow-y-auto flex-1 text-xs">
                 <input type="hidden" id="modal-plan-id">
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Periode Tahun</label>
-                        <select id="modal-plan-year" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500">
+                        <select id="modal-plan-year" onchange="onModalPeriodChanged()" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500">
                             <!-- Populated by JS -->
                         </select>
                     </div>
                     <div>
                         <label class="block font-semibold text-slate-700 mb-1">Periode Bulan</label>
-                        <select id="modal-plan-month" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500">
+                        <select id="modal-plan-month" onchange="onModalPeriodChanged()" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500">
                             <!-- Populated by JS -->
                         </select>
                     </div>
                     <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Satuan</label>
-                        <input type="text" id="modal-plan-satuan" required placeholder="Contoh: Unit, Ls, M2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500">
+                        <label class="block font-semibold text-slate-700 mb-1">Satuan Induk</label>
+                        <input type="text" id="modal-plan-satuan" placeholder="Contoh: Ls / Unit / Dok" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Nama Action Plan Pekerjaan</label>
-                    <input type="text" id="modal-plan-name" required placeholder="Sebutkan Rencana Action Plan..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500">
+                    <label class="block font-semibold text-slate-700 mb-1">Nama Action Plan Pekerjaan Utama</label>
+                    <input type="text" id="modal-plan-name" required placeholder="Sebutkan Nama Pekerjaan Utama..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 font-bold">
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -641,20 +655,28 @@
                     <textarea id="modal-plan-uraian" rows="2" placeholder="Uraian detail tindak lanjut..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500"></textarea>
                 </div>
 
-                <!-- Dynamic Weekly Matrix Input Fields inside Modal -->
+                <!-- SUBTASKS MANAGEMENT SECTION -->
                 <div class="border-t border-slate-200 pt-4 space-y-3">
-                    <h4 class="font-bold text-slate-800 text-xs flex items-center justify-between">
-                        <span>Distribusi Rencana Mingguan (Vol, Biaya, Bobot %)</span>
-                        <span id="modal-total-weight-badge" class="text-xs px-2 py-0.5 rounded bg-slate-100 font-semibold text-primary-600">Total Bobot: 0%</span>
-                    </h4>
-                    <div id="modal-weekly-inputs-container" class="space-y-3 max-h-48 overflow-y-auto pr-1">
-                        <!-- Populated dynamically based on period's active weeks -->
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h4 class="font-bold text-slate-800 text-xs flex items-center gap-2">
+                                <i class="fa-solid fa-sitemap text-primary-600"></i> Rincian Sub Pekerjaan
+                            </h4>
+                            <p class="text-[11px] text-slate-500">Tambahkan sub pekerjaan jika pekerjaan utama diuraikan menjadi beberapa rincian.</p>
+                        </div>
+                        <button type="button" onclick="addModalSubtaskRow()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-semibold rounded-lg text-xs flex items-center gap-1">
+                            <i class="fa-solid fa-plus"></i> + Tambah Sub Pekerjaan
+                        </button>
+                    </div>
+
+                    <div class="space-y-3 max-h-60 overflow-y-auto pr-1" id="modal-subtasks-list-container">
+                        <!-- Dynamic Subtasks Cards populated by JS -->
                     </div>
                 </div>
 
                 <div class="pt-4 border-t border-slate-200 flex justify-end gap-2">
                     <button type="button" onclick="closePlanModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg shadow-sm">Simpan Data</button>
+                    <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg shadow-sm">Simpan Action Plan</button>
                 </div>
             </form>
         </div>
@@ -675,21 +697,26 @@
             globalYear: 2026,
             globalMonth: 2, // Default Maret 2026
             resumeChartMode: 'cost', // 'cost', 'weight', 'deviation'
+            showResumeSubtasks: true,
+            expandedPlans: {}, // Track expanded/collapsed state for parent rows { "plan-id": true }
             
             // Dynamic Master Configuration
             divisions: ['Infrastructure 2', 'Divisi Konstruksi 1', 'Divisi EPCC', 'QA/QC Internal'],
             pics: ['Nyoman Rowin Sinaya', 'Budi Santoso', 'Siti Rahmawati', 'Ahmad Hidayat'],
             
-            // Dynamic Weeks Configuration per Period Key (e.g. "2026-2": ['Minggu 1', 'Minggu 2', ...])
+            // Dynamic Weeks Configuration
             periodWeeks: {
                 "2026-0": ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4"],
                 "2026-1": ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4"],
                 "2026-2": ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4", "Minggu 5"]
             },
 
-            // Action Plan Items Data Repository
+            // Action Plan Items Data Repository (Hierarchical)
             plans: []
         };
+
+        // Temporary state for subtasks while editing in modal
+        let currentModalSubtasks = [];
 
         // Charts instances
         let chartWeeklyProgress = null;
@@ -709,7 +736,7 @@
         });
 
         function loadStateFromStorage() {
-            const saved = localStorage.getItem('action_plan_app_state_v4');
+            const saved = localStorage.getItem('action_plan_app_state_v5');
             if (saved) {
                 try {
                     appState = JSON.parse(saved);
@@ -723,7 +750,7 @@
         }
 
         function saveStateToStorage() {
-            localStorage.setItem('action_plan_app_state_v4', JSON.stringify(appState));
+            localStorage.setItem('action_plan_app_state_v5', JSON.stringify(appState));
         }
 
         function loadDefaultSampleData() {
@@ -736,45 +763,97 @@
                     satuan: "Ls",
                     divisi: "Infrastructure 2",
                     pic: "Nyoman Rowin Sinaya",
-                    uraian: "Mobilisasi alat berat dan pembersihan lahan.",
-                    weeksPlan: {
-                        "W1": { vol: 1, cost: 50000000, weight: 10 },
-                        "W2": { vol: 1, cost: 50000000, weight: 10 },
-                        "W3": { vol: 1, cost: 25000000, weight: 5 },
-                        "W4": { vol: 0, cost: 0, weight: 0 },
-                        "W5": { vol: 0, cost: 0, weight: 0 }
-                    },
-                    weeksActual: {
-                        "W1": { vol: 1, cost: 50000000, weight: 10 },
-                        "W2": { vol: 1, cost: 45000000, weight: 9 },
-                        "W3": { vol: 1, cost: 25000000, weight: 5 },
-                        "W4": { vol: 0, cost: 0, weight: 0 },
-                        "W5": { vol: 0, cost: 0, weight: 0 }
-                    }
+                    uraian: "Pembersihan site, pembuatan direksikit, dan mobilisasi alat.",
+                    subtasks: [
+                        {
+                            id: "sub-101-1",
+                            name: "Mobilisasi Alat Berat Exca & Dozer",
+                            satuan: "Unit",
+                            weeksPlan: {
+                                "W1": { vol: 1, cost: 30000000, weight: 6 },
+                                "W2": { vol: 1, cost: 20000000, weight: 4 },
+                                "W3": { vol: 0, cost: 0, weight: 0 },
+                                "W4": { vol: 0, cost: 0, weight: 0 },
+                                "W5": { vol: 0, cost: 0, weight: 0 }
+                            },
+                            weeksActual: {
+                                "W1": { vol: 1, cost: 30000000, weight: 6 },
+                                "W2": { vol: 1, cost: 20000000, weight: 4 },
+                                "W3": { vol: 0, cost: 0, weight: 0 },
+                                "W4": { vol: 0, cost: 0, weight: 0 },
+                                "W5": { vol: 0, cost: 0, weight: 0 }
+                            }
+                        },
+                        {
+                            id: "sub-101-2",
+                            name: "Pembersihan Lahan & Direksikit",
+                            satuan: "M2",
+                            weeksPlan: {
+                                "W1": { vol: 100, cost: 10000000, weight: 2 },
+                                "W2": { vol: 200, cost: 15000000, weight: 3 },
+                                "W3": { vol: 100, cost: 10000000, weight: 2 },
+                                "W4": { vol: 0, cost: 0, weight: 0 },
+                                "W5": { vol: 0, cost: 0, weight: 0 }
+                            },
+                            weeksActual: {
+                                "W1": { vol: 100, cost: 10000000, weight: 2 },
+                                "W2": { vol: 180, cost: 14000000, weight: 2.8 },
+                                "W3": { vol: 100, cost: 10000000, weight: 2 },
+                                "W4": { vol: 0, cost: 0, weight: 0 },
+                                "W5": { vol: 0, cost: 0, weight: 0 }
+                            }
+                        }
+                    ]
                 },
                 {
                     id: "plan-102",
                     year: 2026,
                     month: 2, // Maret
-                    name: "Pengadaan Material Utama Beton Readymix",
+                    name: "Pengadaan & Pengecoran Beton Readymix",
                     satuan: "M3",
                     divisi: "Infrastructure 2",
                     pic: "Budi Santoso",
-                    uraian: "Supply 500 M3 beton mutu K-350.",
-                    weeksPlan: {
-                        "W1": { vol: 100, cost: 120000000, weight: 15 },
-                        "W2": { vol: 150, cost: 180000000, weight: 20 },
-                        "W3": { vol: 150, cost: 180000000, weight: 20 },
-                        "W4": { vol: 100, cost: 120000000, weight: 20 },
-                        "W5": { vol: 0, cost: 0, weight: 0 }
-                    },
-                    weeksActual: {
-                        "W1": { vol: 100, cost: 120000000, weight: 15 },
-                        "W2": { vol: 160, cost: 190000000, weight: 22 },
-                        "W3": { vol: 120, cost: 140000000, weight: 16 },
-                        "W4": { vol: 80, cost: 95000000, weight: 15 },
-                        "W5": { vol: 0, cost: 0, weight: 0 }
-                    }
+                    uraian: "Supply 500 M3 beton K-350 struktur utama.",
+                    subtasks: [
+                        {
+                            id: "sub-102-1",
+                            name: "Pengecoran Struktur Pondasi",
+                            satuan: "M3",
+                            weeksPlan: {
+                                "W1": { vol: 100, cost: 120000000, weight: 15 },
+                                "W2": { vol: 150, cost: 180000000, weight: 20 },
+                                "W3": { vol: 0, cost: 0, weight: 0 },
+                                "W4": { vol: 0, cost: 0, weight: 0 },
+                                "W5": { vol: 0, cost: 0, weight: 0 }
+                            },
+                            weeksActual: {
+                                "W1": { vol: 100, cost: 120000000, weight: 15 },
+                                "W2": { vol: 160, cost: 190000000, weight: 22 },
+                                "W3": { vol: 0, cost: 0, weight: 0 },
+                                "W4": { vol: 0, cost: 0, weight: 0 },
+                                "W5": { vol: 0, cost: 0, weight: 0 }
+                            }
+                        },
+                        {
+                            id: "sub-102-2",
+                            name: "Pengecoran Kolom & Balok Lt.1",
+                            satuan: "M3",
+                            weeksPlan: {
+                                "W1": { vol: 0, cost: 0, weight: 0 },
+                                "W2": { vol: 0, cost: 0, weight: 0 },
+                                "W3": { vol: 150, cost: 180000000, weight: 20 },
+                                "W4": { vol: 100, cost: 120000000, weight: 20 },
+                                "W5": { vol: 0, cost: 0, weight: 0 }
+                            },
+                            weeksActual: {
+                                "W1": { vol: 0, cost: 0, weight: 0 },
+                                "W2": { vol: 0, cost: 0, weight: 0 },
+                                "W3": { vol: 120, cost: 140000000, weight: 16 },
+                                "W4": { vol: 80, cost: 95000000, weight: 15 },
+                                "W5": { vol: 0, cost: 0, weight: 0 }
+                            }
+                        }
+                    ]
                 }
             ];
             saveStateToStorage();
@@ -858,7 +937,6 @@
         function switchPanel(panelId) {
             appState.activePanel = panelId;
 
-            // Update Sidebar Nav CSS
             document.querySelectorAll('.nav-item').forEach(el => {
                 el.classList.remove('bg-primary-600', 'text-white');
                 el.classList.add('hover:bg-slate-800', 'hover:text-white');
@@ -869,15 +947,13 @@
                 activeNav.classList.remove('hover:bg-slate-800');
             }
 
-            // Hide/Show Panels
             document.querySelectorAll('.panel-content').forEach(p => p.classList.add('hidden'));
             const targetPanel = document.getElementById(`panel-${panelId}`);
             if (targetPanel) targetPanel.classList.remove('hidden');
 
-            // Panel Title Text
             const titleMap = {
                 'dashboard': 'Dashboard Monitoring Action Plan',
-                'rencana': 'Rencana Action Plan (Matrix Horizontal)',
+                'rencana': 'Rencana Action Plan (Hierarki Sub Pekerjaan)',
                 'realisasi': 'Realisasi Action Plan Pekerjaan',
                 'resume': 'Resume & Laporan Evaluasi Bulanan',
                 'master': 'Pengelolaan Data Master',
@@ -905,7 +981,7 @@
         }
 
         // ==========================================
-        // 5. HELPER CALCULATIONS
+        // 5. HELPER CALCULATIONS & RECAPITULATION LOGIC
         // ==========================================
         function filterPlansByGlobalPeriod() {
             return appState.plans.filter(p => {
@@ -915,14 +991,15 @@
             });
         }
 
-        function calculatePlanTotals(plan, weeksList) {
+        // Calculate Totals for a single subtask
+        function calculateSubtaskTotals(subtask, weeksList) {
             let totVolPlan = 0, totCostPlan = 0, totWeightPlan = 0;
             let totVolAct = 0, totCostAct = 0, totWeightAct = 0;
 
             weeksList.forEach((_, idx) => {
                 const wKey = `W${idx + 1}`;
-                const wp = (plan.weeksPlan && plan.weeksPlan[wKey]) || { vol: 0, cost: 0, weight: 0 };
-                const wa = (plan.weeksActual && plan.weeksActual[wKey]) || { vol: 0, cost: 0, weight: 0 };
+                const wp = (subtask.weeksPlan && subtask.weeksPlan[wKey]) || { vol: 0, cost: 0, weight: 0 };
+                const wa = (subtask.weeksActual && subtask.weeksActual[wKey]) || { vol: 0, cost: 0, weight: 0 };
 
                 totVolPlan += parseFloat(wp.vol || 0);
                 totCostPlan += parseFloat(wp.cost || 0);
@@ -934,6 +1011,48 @@
             });
 
             return { totVolPlan, totCostPlan, totWeightPlan, totVolAct, totCostAct, totWeightAct };
+        }
+
+        // Calculate Recapitulated Totals for Parent Action Plan (Sum of subtasks or plan directly if no subtasks)
+        function calculateParentPlanTotals(plan, weeksList) {
+            if (plan.subtasks && plan.subtasks.length > 0) {
+                let totCostPlan = 0, totCostAct = 0;
+                let totWeightPlan = 0, totWeightAct = 0;
+                let totVolPlan = 0, totVolAct = 0;
+                let sameUnit = true;
+                const firstUnit = plan.subtasks[0].satuan;
+
+                plan.subtasks.forEach(s => {
+                    const st = calculateSubtaskTotals(s, weeksList);
+                    totCostPlan += st.totCostPlan;
+                    totCostAct += st.totCostAct;
+                    totWeightPlan += st.totWeightPlan;
+                    totWeightAct += st.totWeightAct;
+
+                    if (s.satuan === firstUnit && sameUnit) {
+                        totVolPlan += st.totVolPlan;
+                        totVolAct += st.totVolAct;
+                    } else {
+                        sameUnit = false;
+                    }
+                });
+
+                return {
+                    totVolPlan: sameUnit ? totVolPlan : '—',
+                    totVolAct: sameUnit ? totVolAct : '—',
+                    totCostPlan, totCostAct,
+                    totWeightPlan, totWeightAct,
+                    satuan: sameUnit ? firstUnit : (plan.satuan || '—')
+                };
+            } else {
+                // If parent has no subtasks, calculate directly if configured
+                return {
+                    totVolPlan: 0, totVolAct: 0,
+                    totCostPlan: 0, totCostAct: 0,
+                    totWeightPlan: 0, totWeightAct: 0,
+                    satuan: plan.satuan || '—'
+                };
+            }
         }
 
         function formatRp(num) {
@@ -953,13 +1072,12 @@
             let countSelesai = 0, countBerjalan = 0, countBelum = 0, countTerlambat = 0;
 
             activePlans.forEach(p => {
-                const totals = calculatePlanTotals(p, weeksList);
+                const totals = calculateParentPlanTotals(p, weeksList);
                 totalPlanCost += totals.totCostPlan;
                 totalActualCost += totals.totCostAct;
                 totalPlanWeight += totals.totWeightPlan;
                 totalActualWeight += totals.totWeightAct;
 
-                // Status Evaluation
                 if (totals.totWeightAct >= totals.totWeightPlan && totals.totWeightPlan > 0) {
                     countSelesai++;
                 } else if (totals.totWeightAct > 0) {
@@ -972,7 +1090,7 @@
             const deviationWeight = totalActualWeight - totalPlanWeight;
 
             // Render KPI Cards
-            document.getElementById('kpi-total-plans').textContent = `${activePlans.length} Pekerjaan`;
+            document.getElementById('kpi-total-plans').textContent = `${activePlans.length} Pekerjaan Utama`;
             document.getElementById('kpi-total-weight').textContent = `${totalPlanWeight.toFixed(2)}% Target Bobot`;
 
             document.getElementById('kpi-realization-pct').textContent = `${totalActualWeight.toFixed(2)}%`;
@@ -985,25 +1103,36 @@
             const costDev = totalActualCost - totalPlanCost;
             document.getElementById('kpi-cost-dev').textContent = `Selisih: ${formatRp(costDev)}`;
 
-            // Status Badges
             document.getElementById('status-cnt-selesai').textContent = countSelesai;
             document.getElementById('status-cnt-berjalan').textContent = countBerjalan;
             document.getElementById('status-cnt-belum').textContent = countBelum;
             document.getElementById('status-cnt-terlambat').textContent = countTerlambat;
 
-            // Render Charts
             renderCharts(activePlans, weeksList);
         }
 
         function renderCharts(activePlans, weeksList) {
             const weekLabels = weeksList;
+
+            // Aggregate weekly totals across subtasks of all parent plans
             const weekPlanWeights = weeksList.map((_, idx) => {
                 const wKey = `W${idx + 1}`;
-                return activePlans.reduce((sum, p) => sum + parseFloat((p.weeksPlan && p.weeksPlan[wKey] && p.weeksPlan[wKey].weight) || 0), 0);
+                return activePlans.reduce((sum, p) => {
+                    if (p.subtasks) {
+                        return sum + p.subtasks.reduce((sSum, sub) => sSum + parseFloat((sub.weeksPlan && sub.weeksPlan[wKey] && sub.weeksPlan[wKey].weight) || 0), 0);
+                    }
+                    return sum;
+                }, 0);
             });
+
             const weekActualWeights = weeksList.map((_, idx) => {
                 const wKey = `W${idx + 1}`;
-                return activePlans.reduce((sum, p) => sum + parseFloat((p.weeksActual && p.weeksActual[wKey] && p.weeksActual[wKey].weight) || 0), 0);
+                return activePlans.reduce((sum, p) => {
+                    if (p.subtasks) {
+                        return sum + p.subtasks.reduce((sSum, sub) => sSum + parseFloat((sub.weeksActual && sub.weeksActual[wKey] && sub.weeksActual[wKey].weight) || 0), 0);
+                    }
+                    return sum;
+                }, 0);
             });
 
             if (chartWeeklyProgress) chartWeeklyProgress.destroy();
@@ -1047,7 +1176,7 @@
             const monthTrendData = MONTH_NAMES.map((_, mIdx) => {
                 const mPlans = appState.plans.filter(p => p.year === appState.globalYear && p.month === mIdx);
                 return mPlans.reduce((sum, p) => {
-                    const totals = calculatePlanTotals(p, getActiveWeeksList(appState.globalYear, mIdx));
+                    const totals = calculateParentPlanTotals(p, getActiveWeeksList(appState.globalYear, mIdx));
                     return sum + totals.totWeightAct;
                 }, 0);
             });
@@ -1073,11 +1202,22 @@
             // Chart 4: Cost Plan vs Actual
             const weekPlanCosts = weeksList.map((_, idx) => {
                 const wKey = `W${idx + 1}`;
-                return activePlans.reduce((sum, p) => sum + parseFloat((p.weeksPlan && p.weeksPlan[wKey] && p.weeksPlan[wKey].cost) || 0), 0);
+                return activePlans.reduce((sum, p) => {
+                    if (p.subtasks) {
+                        return sum + p.subtasks.reduce((sSum, sub) => sSum + parseFloat((sub.weeksPlan && sub.weeksPlan[wKey] && sub.weeksPlan[wKey].cost) || 0), 0);
+                    }
+                    return sum;
+                }, 0);
             });
+
             const weekActualCosts = weeksList.map((_, idx) => {
                 const wKey = `W${idx + 1}`;
-                return activePlans.reduce((sum, p) => sum + parseFloat((p.weeksActual && p.weeksActual[wKey] && p.weeksActual[wKey].cost) || 0), 0);
+                return activePlans.reduce((sum, p) => {
+                    if (p.subtasks) {
+                        return sum + p.subtasks.reduce((sSum, sub) => sSum + parseFloat((sub.weeksActual && sub.weeksActual[wKey] && sub.weeksActual[wKey].cost) || 0), 0);
+                    }
+                    return sum;
+                }, 0);
             });
 
             if (chartCostComparison) chartCostComparison.destroy();
@@ -1096,12 +1236,27 @@
         }
 
         // ==========================================
-        // 7. PANEL RENCANA ACTION PLAN (MATRIX HORIZONTAL)
+        // 7. PANEL RENCANA ACTION PLAN (HIERARCHICAL MATRIX)
         // ==========================================
+        function toggleExpandPlanRow(planId) {
+            appState.expandedPlans[planId] = !appState.expandedPlans[planId];
+            saveStateToStorage();
+            renderRencanaTable();
+            renderRealisasiTable();
+        }
+
+        function toggleExpandAllPlanRows() {
+            const activePlans = filterPlansByGlobalPeriod();
+            const anyCollapsed = activePlans.some(p => !appState.expandedPlans[p.id]);
+            activePlans.forEach(p => appState.expandedPlans[p.id] = anyCollapsed);
+            saveStateToStorage();
+            renderRencanaTable();
+            renderRealisasiTable();
+        }
+
         function renderRencanaTable() {
             const activePlans = filterPlansByGlobalPeriod();
             const searchKeyword = (document.getElementById('search-rencana').value || '').toLowerCase();
-            const filteredPlans = activePlans.filter(p => p.name.toLowerCase().includes(searchKeyword) || p.satuan.toLowerCase().includes(searchKeyword));
             const weeksList = getActiveWeeksList(appState.globalYear, appState.globalMonth);
 
             const hRow1 = document.getElementById('rencana-header-row-1');
@@ -1112,7 +1267,7 @@
             // Header Row 1
             let h1Html = `
                 <th rowspan="2" class="p-3 border-r border-slate-700 sticky-col-1 w-12 text-center">No</th>
-                <th rowspan="2" class="p-3 border-r border-slate-700 sticky-col-2 min-w-[200px]">Nama Action Plan</th>
+                <th rowspan="2" class="p-3 border-r border-slate-700 sticky-col-2 min-w-[240px]">Nama Pekerjaan / Sub Pekerjaan</th>
                 <th rowspan="2" class="p-3 border-r border-slate-700 sticky-col-3 w-20 text-center">Satuan</th>
                 <th colspan="3" class="p-2 border-r border-slate-700 text-center bg-slate-900 text-primary-300">TOTAL RENCANA BULANAN</th>
             `;
@@ -1137,75 +1292,135 @@
             });
             hRow2.innerHTML = h2Html;
 
-            // Body Data Rows
+            // Body Rows (Parent + Subtasks)
             tbody.innerHTML = '';
-            let grandVol = 0, grandCost = 0, grandWeight = 0;
-            let weekTotals = weeksList.map(() => ({ vol: 0, cost: 0, weight: 0 }));
+            let grandCostPlan = 0, grandWeightPlan = 0;
+            let weekGrandTotals = weeksList.map(() => ({ cost: 0, weight: 0 }));
 
-            filteredPlans.forEach((plan, idx) => {
-                const totals = calculatePlanTotals(plan, weeksList);
-                grandVol += totals.totVolPlan;
-                grandCost += totals.totCostPlan;
-                grandWeight += totals.totWeightPlan;
+            activePlans.forEach((plan, idx) => {
+                const parentTotals = calculateParentPlanTotals(plan, weeksList);
+                const isExpanded = appState.expandedPlans[plan.id] !== false; // Default expanded
 
-                let rowHtml = `
-                    <tr class="hover:bg-slate-50 transition border-b border-slate-200">
-                        <td class="p-3 border-r border-slate-200 sticky-col-1 text-center font-semibold bg-white">${idx + 1}</td>
-                        <td class="p-3 border-r border-slate-200 sticky-col-2 font-bold text-slate-800 bg-white">${plan.name}</td>
-                        <td class="p-3 border-r border-slate-200 sticky-col-3 text-center bg-white">${plan.satuan}</td>
-                        
-                        <!-- Totals Columns -->
-                        <td class="p-2 border-r border-slate-200 text-center font-bold bg-primary-50/50 text-slate-800">${totals.totVolPlan}</td>
-                        <td class="p-2 border-r border-slate-200 text-right font-bold bg-primary-50/50 text-slate-800">${formatRp(totals.totCostPlan)}</td>
-                        <td class="p-2 border-r border-slate-200 text-center font-bold bg-primary-50/50 text-primary-700">${totals.totWeightPlan.toFixed(2)}%</td>
+                // Check search filter
+                const matchesSearch = plan.name.toLowerCase().includes(searchKeyword) || 
+                    (plan.subtasks && plan.subtasks.some(s => s.name.toLowerCase().includes(searchKeyword)));
+
+                if (!matchesSearch) return;
+
+                grandCostPlan += parentTotals.totCostPlan;
+                grandWeightPlan += parentTotals.totWeightPlan;
+
+                // PARENT ROW
+                let parentRowHtml = `
+                    <tr class="bg-slate-100/90 font-bold border-b border-slate-300 text-slate-800">
+                        <td class="p-3 border-r border-slate-300 sticky-col-1 text-center bg-slate-100">${idx + 1}</td>
+                        <td class="p-3 border-r border-slate-300 sticky-col-2 bg-slate-100">
+                            <div class="flex items-center gap-2">
+                                ${plan.subtasks && plan.subtasks.length > 0 ? `
+                                    <button onclick="toggleExpandPlanRow('${plan.id}')" class="text-primary-600 hover:text-primary-800 text-sm font-bold w-4 text-center">
+                                        ${isExpanded ? '▼' : '►'}
+                                    </button>
+                                ` : '<span class="w-4"></span>'}
+                                <span>${plan.name}</span>
+                                <span class="text-[10px] bg-primary-100 text-primary-800 px-1.5 py-0.5 rounded">${plan.subtasks ? plan.subtasks.length : 0} Sub</span>
+                            </div>
+                        </td>
+                        <td class="p-3 border-r border-slate-300 sticky-col-3 text-center bg-slate-100">${parentTotals.satuan}</td>
+                        <td class="p-2 border-r border-slate-300 text-center font-bold bg-primary-50 text-slate-900">${parentTotals.totVolPlan}</td>
+                        <td class="p-2 border-r border-slate-300 text-right font-bold bg-primary-50 text-slate-900">${formatRp(parentTotals.totCostPlan)}</td>
+                        <td class="p-2 border-r border-slate-300 text-center font-bold bg-primary-50 text-primary-700">${parentTotals.totWeightPlan.toFixed(2)}%</td>
                 `;
 
-                // Weekly Matrix Cells
+                // Calculate weekly sums for parent row
                 weeksList.forEach((_, wIdx) => {
                     const wKey = `W${wIdx + 1}`;
-                    const wp = (plan.weeksPlan && plan.weeksPlan[wKey]) || { vol: 0, cost: 0, weight: 0 };
+                    let wVol = 0, wCost = 0, wWeight = 0;
+                    let sameUnit = true;
+                    const firstUnit = plan.subtasks && plan.subtasks[0] ? plan.subtasks[0].satuan : null;
 
-                    weekTotals[wIdx].vol += parseFloat(wp.vol || 0);
-                    weekTotals[wIdx].cost += parseFloat(wp.cost || 0);
-                    weekTotals[wIdx].weight += parseFloat(wp.weight || 0);
+                    if (plan.subtasks) {
+                        plan.subtasks.forEach(s => {
+                            const wp = (s.weeksPlan && s.weeksPlan[wKey]) || { vol: 0, cost: 0, weight: 0 };
+                            wCost += parseFloat(wp.cost || 0);
+                            wWeight += parseFloat(wp.weight || 0);
+                            if (s.satuan === firstUnit && sameUnit) wVol += parseFloat(wp.vol || 0);
+                            else sameUnit = false;
+                        });
+                    }
 
-                    rowHtml += `
-                        <td class="p-1 border-r border-slate-200 text-center">
-                            <input type="number" step="any" value="${wp.vol}" onchange="updateInlinePlan('${plan.id}', '${wKey}', 'vol', this.value)" class="w-14 text-center px-1 py-0.5 border border-slate-200 rounded focus:ring-1 focus:ring-primary-500">
-                        </td>
-                        <td class="p-1 border-r border-slate-200 text-right">
-                            <input type="number" step="any" value="${wp.cost}" onchange="updateInlinePlan('${plan.id}', '${wKey}', 'cost', this.value)" class="w-24 text-right px-1 py-0.5 border border-slate-200 rounded focus:ring-1 focus:ring-primary-500">
-                        </td>
-                        <td class="p-1 border-r border-slate-200 text-center">
-                            <input type="number" step="any" value="${wp.weight}" onchange="updateInlinePlan('${plan.id}', '${wKey}', 'weight', this.value)" class="w-16 text-center px-1 py-0.5 border border-slate-200 rounded focus:ring-1 focus:ring-primary-500 font-semibold">
-                        </td>
+                    weekGrandTotals[wIdx].cost += wCost;
+                    weekGrandTotals[wIdx].weight += wWeight;
+
+                    parentRowHtml += `
+                        <td class="p-2 border-r border-slate-300 text-center font-bold bg-slate-50">${sameUnit ? wVol : '—'}</td>
+                        <td class="p-2 border-r border-slate-300 text-right font-bold bg-slate-50">${formatRp(wCost)}</td>
+                        <td class="p-2 border-r border-slate-300 text-center font-bold text-primary-700 bg-slate-50">${wWeight.toFixed(2)}%</td>
                     `;
                 });
 
-                rowHtml += `
+                parentRowHtml += `
                     <td class="p-2 text-center no-print">
                         <div class="flex items-center justify-center gap-1">
-                            <button onclick="openPlanModal('${plan.id}')" class="p-1 text-blue-600 hover:text-blue-800" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
-                            <button onclick="deletePlan('${plan.id}')" class="p-1 text-rose-600 hover:text-rose-800" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                            <button onclick="openPlanModal('${plan.id}')" class="p-1 text-blue-600 hover:text-blue-800" title="Edit Action Plan & Sub"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deletePlan('${plan.id}')" class="p-1 text-rose-600 hover:text-rose-800" title="Hapus Action Plan"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </td>
                 </tr>`;
 
-                tbody.innerHTML += rowHtml;
+                tbody.innerHTML += parentRowHtml;
+
+                // CHILD SUBTASK ROWS (Rendered if Expanded)
+                if (isExpanded && plan.subtasks) {
+                    plan.subtasks.forEach((sub, sIdx) => {
+                        const subTotals = calculateSubtaskTotals(sub, weeksList);
+
+                        let subRowHtml = `
+                            <tr class="subtask-row text-slate-700 text-xs border-b border-slate-200">
+                                <td class="p-2.5 border-r border-slate-200 sticky-col-1 text-center font-mono text-[11px] text-slate-400 bg-slate-50">${idx + 1}.${sIdx + 1}</td>
+                                <td class="p-2.5 border-r border-slate-200 sticky-col-2 pl-8 bg-slate-50">
+                                    <span class="text-slate-400 mr-1">↳</span> <span class="font-medium text-slate-800">${sub.name}</span>
+                                </td>
+                                <td class="p-2.5 border-r border-slate-200 sticky-col-3 text-center bg-slate-50">${sub.satuan}</td>
+                                <td class="p-2 border-r border-slate-200 text-center font-semibold text-slate-700">${subTotals.totVolPlan}</td>
+                                <td class="p-2 border-r border-slate-200 text-right font-semibold text-slate-700">${formatRp(subTotals.totCostPlan)}</td>
+                                <td class="p-2 border-r border-slate-200 text-center font-semibold text-primary-600">${subTotals.totWeightPlan.toFixed(2)}%</td>
+                        `;
+
+                        weeksList.forEach((_, wIdx) => {
+                            const wKey = `W${wIdx + 1}`;
+                            const wp = (sub.weeksPlan && sub.weeksPlan[wKey]) || { vol: 0, cost: 0, weight: 0 };
+
+                            subRowHtml += `
+                                <td class="p-1 border-r border-slate-200 text-center">
+                                    <input type="number" step="any" value="${wp.vol}" onchange="updateInlineSubtaskPlan('${plan.id}', '${sub.id}', '${wKey}', 'vol', this.value)" class="w-14 text-center px-1 py-0.5 border border-slate-200 rounded focus:ring-1 focus:ring-primary-500 text-xs">
+                                </td>
+                                <td class="p-1 border-r border-slate-200 text-right">
+                                    <input type="number" step="any" value="${wp.cost}" onchange="updateInlineSubtaskPlan('${plan.id}', '${sub.id}', '${wKey}', 'cost', this.value)" class="w-24 text-right px-1 py-0.5 border border-slate-200 rounded focus:ring-1 focus:ring-primary-500 text-xs">
+                                </td>
+                                <td class="p-1 border-r border-slate-200 text-center">
+                                    <input type="number" step="any" value="${wp.weight}" onchange="updateInlineSubtaskPlan('${plan.id}', '${sub.id}', '${wKey}', 'weight', this.value)" class="w-16 text-center px-1 py-0.5 border border-slate-200 rounded focus:ring-1 focus:ring-primary-500 text-xs font-semibold">
+                                </td>
+                            `;
+                        });
+
+                        subRowHtml += `<td class="p-2 text-center no-print text-slate-400">—</td></tr>`;
+                        tbody.innerHTML += subRowHtml;
+                    });
+                }
             });
 
-            // Footer Summary Row
+            // Summary Foot Row
             let footHtml = `
                 <tr>
                     <td colspan="3" class="p-3 border-r border-slate-300 text-center font-bold uppercase sticky-col-1 bg-slate-100">TOTAL KESELURUHAN</td>
-                    <td class="p-2 border-r border-slate-300 text-center font-bold text-slate-800">${grandVol}</td>
-                    <td class="p-2 border-r border-slate-300 text-right font-bold text-slate-800">${formatRp(grandCost)}</td>
-                    <td class="p-2 border-r border-slate-300 text-center font-bold text-primary-700">${grandWeight.toFixed(2)}%</td>
+                    <td class="p-2 border-r border-slate-300 text-center font-bold">—</td>
+                    <td class="p-2 border-r border-slate-300 text-right font-bold text-slate-800">${formatRp(grandCostPlan)}</td>
+                    <td class="p-2 border-r border-slate-300 text-center font-bold text-primary-700">${grandWeightPlan.toFixed(2)}%</td>
             `;
 
-            weekTotals.forEach(wt => {
+            weekGrandTotals.forEach(wt => {
                 footHtml += `
-                    <td class="p-2 border-r border-slate-300 text-center font-bold">${wt.vol}</td>
+                    <td class="p-2 border-r border-slate-300 text-center font-bold">—</td>
                     <td class="p-2 border-r border-slate-300 text-right font-bold">${formatRp(wt.cost)}</td>
                     <td class="p-2 border-r border-slate-300 text-center font-bold text-primary-700">${wt.weight.toFixed(2)}%</td>
                 `;
@@ -1215,25 +1430,26 @@
             tfoot.innerHTML = footHtml;
         }
 
-        function updateInlinePlan(planId, weekKey, field, value) {
+        function updateInlineSubtaskPlan(planId, subId, weekKey, field, value) {
             const plan = appState.plans.find(p => p.id === planId);
-            if (!plan) return;
+            if (!plan || !plan.subtasks) return;
+            const sub = plan.subtasks.find(s => s.id === subId);
+            if (!sub) return;
 
-            if (!plan.weeksPlan) plan.weeksPlan = {};
-            if (!plan.weeksPlan[weekKey]) plan.weeksPlan[weekKey] = { vol: 0, cost: 0, weight: 0 };
+            if (!sub.weeksPlan) sub.weeksPlan = {};
+            if (!sub.weeksPlan[weekKey]) sub.weeksPlan[weekKey] = { vol: 0, cost: 0, weight: 0 };
 
-            plan.weeksPlan[weekKey][field] = parseFloat(value || 0);
+            sub.weeksPlan[weekKey][field] = parseFloat(value || 0);
             saveStateToStorage();
             refreshActivePanel();
         }
 
         // ==========================================
-        // 8. PANEL REALISASI ACTION PLAN
+        // 8. PANEL REALISASI ACTION PLAN (HIERARCHICAL)
         // ==========================================
         function renderRealisasiTable() {
             const activePlans = filterPlansByGlobalPeriod();
             const searchKeyword = (document.getElementById('search-realisasi').value || '').toLowerCase();
-            const filteredPlans = activePlans.filter(p => p.name.toLowerCase().includes(searchKeyword));
             const weeksList = getActiveWeeksList(appState.globalYear, appState.globalMonth);
 
             const hRow1 = document.getElementById('realisasi-header-row-1');
@@ -1241,10 +1457,9 @@
             const tbody = document.getElementById('realisasi-table-body');
             const tfoot = document.getElementById('realisasi-table-foot');
 
-            // Header Row 1
             let h1Html = `
                 <th rowspan="2" class="p-3 border-r border-slate-700 sticky-col-1 w-12 text-center">No</th>
-                <th rowspan="2" class="p-3 border-r border-slate-700 sticky-col-2 min-w-[200px]">Nama Action Plan</th>
+                <th rowspan="2" class="p-3 border-r border-slate-700 sticky-col-2 min-w-[240px]">Nama Pekerjaan / Sub Pekerjaan</th>
                 <th rowspan="2" class="p-3 border-r border-slate-700 sticky-col-3 w-20 text-center">Satuan</th>
                 <th colspan="3" class="p-2 border-r border-slate-700 text-center bg-slate-900 text-emerald-300">TOTAL REALISASI BULANAN</th>
             `;
@@ -1254,7 +1469,6 @@
             h1Html += `<th rowspan="2" class="p-3 text-center w-24">Deviasi Bobot</th>`;
             hRow1.innerHTML = h1Html;
 
-            // Header Row 2
             let h2Html = `
                 <th class="p-2 border-r border-slate-600 text-center bg-slate-800 text-emerald-300">Vol</th>
                 <th class="p-2 border-r border-slate-600 text-center bg-slate-800 text-emerald-300">Jumlah (Rp)</th>
@@ -1269,73 +1483,134 @@
             });
             hRow2.innerHTML = h2Html;
 
-            // Body Data Rows
             tbody.innerHTML = '';
-            let grandVolAct = 0, grandCostAct = 0, grandWeightAct = 0;
-            let weekTotals = weeksList.map(() => ({ vol: 0, cost: 0, weight: 0 }));
+            let grandCostAct = 0, grandWeightAct = 0;
+            let weekGrandTotals = weeksList.map(() => ({ cost: 0, weight: 0 }));
 
-            filteredPlans.forEach((plan, idx) => {
-                const totals = calculatePlanTotals(plan, weeksList);
-                grandVolAct += totals.totVolAct;
-                grandCostAct += totals.totCostAct;
-                grandWeightAct += totals.totWeightAct;
+            activePlans.forEach((plan, idx) => {
+                const parentTotals = calculateParentPlanTotals(plan, weeksList);
+                const isExpanded = appState.expandedPlans[plan.id] !== false;
+                const matchesSearch = plan.name.toLowerCase().includes(searchKeyword) || 
+                    (plan.subtasks && plan.subtasks.some(s => s.name.toLowerCase().includes(searchKeyword)));
 
-                const devWeight = totals.totWeightAct - totals.totWeightPlan;
+                if (!matchesSearch) return;
 
-                let rowHtml = `
-                    <tr class="hover:bg-slate-50 transition border-b border-slate-200">
-                        <td class="p-3 border-r border-slate-200 sticky-col-1 text-center font-semibold bg-white">${idx + 1}</td>
-                        <td class="p-3 border-r border-slate-200 sticky-col-2 font-bold text-slate-800 bg-white">${plan.name}</td>
-                        <td class="p-3 border-r border-slate-200 sticky-col-3 text-center bg-white">${plan.satuan}</td>
-                        
-                        <!-- Totals Columns -->
-                        <td class="p-2 border-r border-slate-200 text-center font-bold bg-emerald-50/50 text-slate-800">${totals.totVolAct}</td>
-                        <td class="p-2 border-r border-slate-200 text-right font-bold bg-emerald-50/50 text-slate-800">${formatRp(totals.totCostAct)}</td>
-                        <td class="p-2 border-r border-slate-200 text-center font-bold bg-emerald-50/50 text-emerald-700">${totals.totWeightAct.toFixed(2)}%</td>
+                grandCostAct += parentTotals.totCostAct;
+                grandWeightAct += parentTotals.totWeightAct;
+
+                const parentDevWeight = parentTotals.totWeightAct - parentTotals.totWeightPlan;
+
+                // PARENT ROW REALISASI
+                let parentRowHtml = `
+                    <tr class="bg-slate-100/90 font-bold border-b border-slate-300 text-slate-800">
+                        <td class="p-3 border-r border-slate-300 sticky-col-1 text-center bg-slate-100">${idx + 1}</td>
+                        <td class="p-3 border-r border-slate-300 sticky-col-2 bg-slate-100">
+                            <div class="flex items-center gap-2">
+                                ${plan.subtasks && plan.subtasks.length > 0 ? `
+                                    <button onclick="toggleExpandPlanRow('${plan.id}')" class="text-emerald-600 hover:text-emerald-800 text-sm font-bold w-4 text-center">
+                                        ${isExpanded ? '▼' : '►'}
+                                    </button>
+                                ` : '<span class="w-4"></span>'}
+                                <span>${plan.name}</span>
+                            </div>
+                        </td>
+                        <td class="p-3 border-r border-slate-300 sticky-col-3 text-center bg-slate-100">${parentTotals.satuan}</td>
+                        <td class="p-2 border-r border-slate-300 text-center font-bold bg-emerald-50 text-slate-900">${parentTotals.totVolAct}</td>
+                        <td class="p-2 border-r border-slate-300 text-right font-bold bg-emerald-50 text-slate-900">${formatRp(parentTotals.totCostAct)}</td>
+                        <td class="p-2 border-r border-slate-300 text-center font-bold bg-emerald-50 text-emerald-700">${parentTotals.totWeightAct.toFixed(2)}%</td>
                 `;
 
                 weeksList.forEach((_, wIdx) => {
                     const wKey = `W${wIdx + 1}`;
-                    const wa = (plan.weeksActual && plan.weeksActual[wKey]) || { vol: 0, cost: 0, weight: 0 };
+                    let wVol = 0, wCost = 0, wWeight = 0;
+                    let sameUnit = true;
+                    const firstUnit = plan.subtasks && plan.subtasks[0] ? plan.subtasks[0].satuan : null;
 
-                    weekTotals[wIdx].vol += parseFloat(wa.vol || 0);
-                    weekTotals[wIdx].cost += parseFloat(wa.cost || 0);
-                    weekTotals[wIdx].weight += parseFloat(wa.weight || 0);
+                    if (plan.subtasks) {
+                        plan.subtasks.forEach(s => {
+                            const wa = (s.weeksActual && s.weeksActual[wKey]) || { vol: 0, cost: 0, weight: 0 };
+                            wCost += parseFloat(wa.cost || 0);
+                            wWeight += parseFloat(wa.weight || 0);
+                            if (s.satuan === firstUnit && sameUnit) wVol += parseFloat(wa.vol || 0);
+                            else sameUnit = false;
+                        });
+                    }
 
-                    rowHtml += `
-                        <td class="p-1 border-r border-slate-200 text-center">
-                            <input type="number" step="any" value="${wa.vol}" onchange="updateInlineActual('${plan.id}', '${wKey}', 'vol', this.value)" class="w-14 text-center px-1 py-0.5 border border-slate-200 rounded focus:ring-1 focus:ring-emerald-500">
-                        </td>
-                        <td class="p-1 border-r border-slate-200 text-right">
-                            <input type="number" step="any" value="${wa.cost}" onchange="updateInlineActual('${plan.id}', '${wKey}', 'cost', this.value)" class="w-24 text-right px-1 py-0.5 border border-slate-200 rounded focus:ring-1 focus:ring-emerald-500">
-                        </td>
-                        <td class="p-1 border-r border-slate-200 text-center">
-                            <input type="number" step="any" value="${wa.weight}" onchange="updateInlineActual('${plan.id}', '${wKey}', 'weight', this.value)" class="w-16 text-center px-1 py-0.5 border border-slate-200 rounded focus:ring-1 focus:ring-emerald-500 font-semibold">
-                        </td>
+                    weekGrandTotals[wIdx].cost += wCost;
+                    weekGrandTotals[wIdx].weight += wWeight;
+
+                    parentRowHtml += `
+                        <td class="p-2 border-r border-slate-300 text-center font-bold bg-slate-50">${sameUnit ? wVol : '—'}</td>
+                        <td class="p-2 border-r border-slate-300 text-right font-bold bg-slate-50">${formatRp(wCost)}</td>
+                        <td class="p-2 border-r border-slate-300 text-center font-bold text-emerald-700 bg-slate-50">${wWeight.toFixed(2)}%</td>
                     `;
                 });
 
-                rowHtml += `
-                    <td class="p-2 text-center font-bold ${devWeight >= 0 ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50'}">
-                        ${devWeight >= 0 ? '+' : ''}${devWeight.toFixed(2)}%
+                parentRowHtml += `
+                    <td class="p-2 text-center font-bold ${parentDevWeight >= 0 ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50'}">
+                        ${parentDevWeight >= 0 ? '+' : ''}${parentDevWeight.toFixed(2)}%
                     </td>
                 </tr>`;
 
-                tbody.innerHTML += rowHtml;
+                tbody.innerHTML += parentRowHtml;
+
+                // CHILD SUBTASK REALISASI ROWS
+                if (isExpanded && plan.subtasks) {
+                    plan.subtasks.forEach((sub, sIdx) => {
+                        const subTotals = calculateSubtaskTotals(sub, weeksList);
+                        const subDevWeight = subTotals.totWeightAct - subTotals.totWeightPlan;
+
+                        let subRowHtml = `
+                            <tr class="subtask-row text-slate-700 text-xs border-b border-slate-200">
+                                <td class="p-2.5 border-r border-slate-200 sticky-col-1 text-center font-mono text-[11px] text-slate-400 bg-slate-50">${idx + 1}.${sIdx + 1}</td>
+                                <td class="p-2.5 border-r border-slate-200 sticky-col-2 pl-8 bg-slate-50">
+                                    <span class="text-slate-400 mr-1">↳</span> <span class="font-medium text-slate-800">${sub.name}</span>
+                                </td>
+                                <td class="p-2.5 border-r border-slate-200 sticky-col-3 text-center bg-slate-50">${sub.satuan}</td>
+                                <td class="p-2 border-r border-slate-200 text-center font-semibold text-slate-700">${subTotals.totVolAct}</td>
+                                <td class="p-2 border-r border-slate-200 text-right font-semibold text-slate-700">${formatRp(subTotals.totCostAct)}</td>
+                                <td class="p-2 border-r border-slate-200 text-center font-semibold text-emerald-600">${subTotals.totWeightAct.toFixed(2)}%</td>
+                        `;
+
+                        weeksList.forEach((_, wIdx) => {
+                            const wKey = `W${wIdx + 1}`;
+                            const wa = (sub.weeksActual && sub.weeksActual[wKey]) || { vol: 0, cost: 0, weight: 0 };
+
+                            subRowHtml += `
+                                <td class="p-1 border-r border-slate-200 text-center">
+                                    <input type="number" step="any" value="${wa.vol}" onchange="updateInlineSubtaskActual('${plan.id}', '${sub.id}', '${wKey}', 'vol', this.value)" class="w-14 text-center px-1 py-0.5 border border-slate-200 rounded focus:ring-1 focus:ring-emerald-500 text-xs">
+                                </td>
+                                <td class="p-1 border-r border-slate-200 text-right">
+                                    <input type="number" step="any" value="${wa.cost}" onchange="updateInlineSubtaskActual('${plan.id}', '${sub.id}', '${wKey}', 'cost', this.value)" class="w-24 text-right px-1 py-0.5 border border-slate-200 rounded focus:ring-1 focus:ring-emerald-500 text-xs">
+                                </td>
+                                <td class="p-1 border-r border-slate-200 text-center">
+                                    <input type="number" step="any" value="${wa.weight}" onchange="updateInlineSubtaskActual('${plan.id}', '${sub.id}', '${wKey}', 'weight', this.value)" class="w-16 text-center px-1 py-0.5 border border-slate-200 rounded focus:ring-1 focus:ring-emerald-500 text-xs font-semibold">
+                                </td>
+                            `;
+                        });
+
+                        subRowHtml += `
+                            <td class="p-2 text-center font-semibold text-xs ${subDevWeight >= 0 ? 'text-emerald-600' : 'text-rose-600'}">
+                                ${subDevWeight >= 0 ? '+' : ''}${subDevWeight.toFixed(2)}%
+                            </td>
+                        </tr>`;
+                        tbody.innerHTML += subRowHtml;
+                    });
+                }
             });
 
-            // Footer Summary Row
+            // Summary Foot Row
             let footHtml = `
                 <tr>
                     <td colspan="3" class="p-3 border-r border-slate-300 text-center font-bold uppercase sticky-col-1 bg-slate-100">TOTAL REALISASI</td>
-                    <td class="p-2 border-r border-slate-300 text-center font-bold text-slate-800">${grandVolAct}</td>
+                    <td class="p-2 border-r border-slate-300 text-center font-bold">—</td>
                     <td class="p-2 border-r border-slate-300 text-right font-bold text-slate-800">${formatRp(grandCostAct)}</td>
                     <td class="p-2 border-r border-slate-300 text-center font-bold text-emerald-700">${grandWeightAct.toFixed(2)}%</td>
             `;
 
-            weekTotals.forEach(wt => {
+            weekGrandTotals.forEach(wt => {
                 footHtml += `
-                    <td class="p-2 border-r border-slate-300 text-center font-bold">${wt.vol}</td>
+                    <td class="p-2 border-r border-slate-300 text-center font-bold">—</td>
                     <td class="p-2 border-r border-slate-300 text-right font-bold">${formatRp(wt.cost)}</td>
                     <td class="p-2 border-r border-slate-300 text-center font-bold text-emerald-700">${wt.weight.toFixed(2)}%</td>
                 `;
@@ -1345,14 +1620,16 @@
             tfoot.innerHTML = footHtml;
         }
 
-        function updateInlineActual(planId, weekKey, field, value) {
+        function updateInlineSubtaskActual(planId, subId, weekKey, field, value) {
             const plan = appState.plans.find(p => p.id === planId);
-            if (!plan) return;
+            if (!plan || !plan.subtasks) return;
+            const sub = plan.subtasks.find(s => s.id === subId);
+            if (!sub) return;
 
-            if (!plan.weeksActual) plan.weeksActual = {};
-            if (!plan.weeksActual[weekKey]) plan.weeksActual[weekKey] = { vol: 0, cost: 0, weight: 0 };
+            if (!sub.weeksActual) sub.weeksActual = {};
+            if (!sub.weeksActual[weekKey]) sub.weeksActual[weekKey] = { vol: 0, cost: 0, weight: 0 };
 
-            plan.weeksActual[weekKey][field] = parseFloat(value || 0);
+            sub.weeksActual[weekKey][field] = parseFloat(value || 0);
             saveStateToStorage();
             refreshActivePanel();
         }
@@ -1360,6 +1637,15 @@
         // ==========================================
         // 9. PANEL RESUME BULANAN & EVALUATION
         // ==========================================
+        function toggleResumeSubtasksView() {
+            appState.showResumeSubtasks = !appState.showResumeSubtasks;
+            document.getElementById('btn-toggle-resume-subtasks').innerHTML = appState.showResumeSubtasks 
+                ? '<i class="fa-solid fa-sitemap"></i> Sembunyikan Sub Pekerjaan'
+                : '<i class="fa-solid fa-sitemap"></i> Tampilkan Sub Pekerjaan';
+            saveStateToStorage();
+            renderResumeItemsTable();
+        }
+
         function renderResumePanel() {
             const activePlans = filterPlansByGlobalPeriod();
             const weeksList = getActiveWeeksList(appState.globalYear, appState.globalMonth);
@@ -1371,12 +1657,11 @@
             document.getElementById('resume-doc-period').textContent = `PERIODE MONITORING: ${periodText}`;
             document.getElementById('resume-doc-date').textContent = new Date().toLocaleDateString('id-ID');
 
-            // 1. Calculate Grand Totals for KPI Cards
             let totCostPlan = 0, totCostAct = 0;
             let totWeightPlan = 0, totWeightAct = 0;
 
             activePlans.forEach(p => {
-                const totals = calculatePlanTotals(p, weeksList);
+                const totals = calculateParentPlanTotals(p, weeksList);
                 totCostPlan += totals.totCostPlan;
                 totCostAct += totals.totCostAct;
                 totWeightPlan += totals.totWeightPlan;
@@ -1396,16 +1681,9 @@
             document.getElementById('res-kpi-weight-dev').textContent = `${devWeight >= 0 ? '+' : ''}${devWeight.toFixed(2)}%`;
             document.getElementById('res-kpi-weight-dev').className = `text-sm font-bold mt-1 ${devWeight >= 0 ? 'text-emerald-600' : 'text-rose-600'}`;
 
-            // 2. Render Rincian Item Pekerjaan Table
             renderResumeItemsTable();
-
-            // 3. Render Weekly Comparison Table
             renderResumeWeeklyTable();
-
-            // 4. Render Resume Chart
             renderResumeChart();
-
-            // 5. Render Automatic Evaluation Draft
             renderResumeEvaluationText(activePlans, weeksList, totCostPlan, totCostAct, devCost, totWeightPlan, totWeightAct, devWeight);
         }
 
@@ -1413,49 +1691,76 @@
             const activePlans = filterPlansByGlobalPeriod();
             const weeksList = getActiveWeeksList(appState.globalYear, appState.globalMonth);
             const searchKeyword = (document.getElementById('search-resume-items')?.value || '').toLowerCase();
-            const filteredPlans = activePlans.filter(p => p.name.toLowerCase().includes(searchKeyword));
 
             const tbody = document.getElementById('resume-items-tbody');
             const tfoot = document.getElementById('resume-items-tfoot');
             tbody.innerHTML = '';
 
-            if (filteredPlans.length === 0) {
+            if (activePlans.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-400">Tidak ada data Action Plan pada periode ini.</td></tr>`;
                 tfoot.innerHTML = '';
                 return;
             }
 
-            let grandVolPlan = 0, grandVolAct = 0;
             let grandCostPlan = 0, grandCostAct = 0;
             let grandWeightPlan = 0, grandWeightAct = 0;
 
-            filteredPlans.forEach((plan, idx) => {
-                const totals = calculatePlanTotals(plan, weeksList);
-                grandVolPlan += totals.totVolPlan;
-                grandVolAct += totals.totVolAct;
-                grandCostPlan += totals.totCostPlan;
-                grandCostAct += totals.totCostAct;
-                grandWeightPlan += totals.totWeightPlan;
-                grandWeightAct += totals.totWeightAct;
+            activePlans.forEach((plan, idx) => {
+                const pTotals = calculateParentPlanTotals(plan, weeksList);
+                const matchesSearch = plan.name.toLowerCase().includes(searchKeyword) || 
+                    (plan.subtasks && plan.subtasks.some(s => s.name.toLowerCase().includes(searchKeyword)));
 
-                const devWeight = totals.totWeightAct - totals.totWeightPlan;
+                if (!matchesSearch) return;
 
+                grandCostPlan += pTotals.totCostPlan;
+                grandCostAct += pTotals.totCostAct;
+                grandWeightPlan += pTotals.totWeightPlan;
+                grandWeightAct += pTotals.totWeightAct;
+
+                const parentDevWeight = pTotals.totWeightAct - pTotals.totWeightPlan;
+
+                // Parent Row
                 tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50 border-b border-slate-100">
-                        <td class="p-2.5 text-center font-semibold">${idx + 1}</td>
-                        <td class="p-2.5 font-bold text-slate-800">${plan.name}</td>
-                        <td class="p-2.5 text-center">${plan.satuan || '—'}</td>
-                        <td class="p-2.5 text-center">${totals.totVolPlan || 0}</td>
-                        <td class="p-2.5 text-center">${totals.totVolAct || 0}</td>
-                        <td class="p-2.5 text-right font-mono">${formatRp(totals.totCostPlan)}</td>
-                        <td class="p-2.5 text-right font-mono">${formatRp(totals.totCostAct)}</td>
-                        <td class="p-2.5 text-center font-semibold text-primary-600">${totals.totWeightPlan.toFixed(2)}%</td>
-                        <td class="p-2.5 text-center font-semibold text-emerald-600">${totals.totWeightAct.toFixed(2)}%</td>
-                        <td class="p-2.5 text-center font-bold ${devWeight >= 0 ? 'text-emerald-600' : 'text-rose-600'}">
-                            ${devWeight >= 0 ? '+' : ''}${devWeight.toFixed(2)}%
+                    <tr class="bg-slate-100 font-bold border-b border-slate-300">
+                        <td class="p-2.5 text-center">${idx + 1}</td>
+                        <td class="p-2.5 text-slate-900">${plan.name}</td>
+                        <td class="p-2.5 text-center">${pTotals.satuan}</td>
+                        <td class="p-2.5 text-center">${pTotals.totVolPlan}</td>
+                        <td class="p-2.5 text-center">${pTotals.totVolAct}</td>
+                        <td class="p-2.5 text-right font-mono">${formatRp(pTotals.totCostPlan)}</td>
+                        <td class="p-2.5 text-right font-mono">${formatRp(pTotals.totCostAct)}</td>
+                        <td class="p-2.5 text-center text-primary-700">${pTotals.totWeightPlan.toFixed(2)}%</td>
+                        <td class="p-2.5 text-center text-emerald-700">${pTotals.totWeightAct.toFixed(2)}%</td>
+                        <td class="p-2.5 text-center ${parentDevWeight >= 0 ? 'text-emerald-700' : 'text-rose-700'}">
+                            ${parentDevWeight >= 0 ? '+' : ''}${parentDevWeight.toFixed(2)}%
                         </td>
                     </tr>
                 `;
+
+                // Child Subtask Rows (If enabled)
+                if (appState.showResumeSubtasks && plan.subtasks) {
+                    plan.subtasks.forEach((sub, sIdx) => {
+                        const sTotals = calculateSubtaskTotals(sub, weeksList);
+                        const subDevWeight = sTotals.totWeightAct - sTotals.totWeightPlan;
+
+                        tbody.innerHTML += `
+                            <tr class="subtask-row text-slate-700 border-b border-slate-200">
+                                <td class="p-2 text-center text-slate-400 font-mono text-[11px]">${idx + 1}.${sIdx + 1}</td>
+                                <td class="p-2 pl-6"><span class="text-slate-400">↳</span> ${sub.name}</td>
+                                <td class="p-2 text-center">${sub.satuan}</td>
+                                <td class="p-2 text-center">${sTotals.totVolPlan}</td>
+                                <td class="p-2 text-center">${sTotals.totVolAct}</td>
+                                <td class="p-2 text-right font-mono">${formatRp(sTotals.totCostPlan)}</td>
+                                <td class="p-2 text-right font-mono">${formatRp(sTotals.totCostAct)}</td>
+                                <td class="p-2 text-center text-primary-600">${sTotals.totWeightPlan.toFixed(2)}%</td>
+                                <td class="p-2 text-center text-emerald-600">${sTotals.totWeightAct.toFixed(2)}%</td>
+                                <td class="p-2 text-center font-semibold ${subDevWeight >= 0 ? 'text-emerald-600' : 'text-rose-600'}">
+                                    ${subDevWeight >= 0 ? '+' : ''}${subDevWeight.toFixed(2)}%
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
             });
 
             const grandDevWeight = grandWeightAct - grandWeightPlan;
@@ -1463,8 +1768,8 @@
             tfoot.innerHTML = `
                 <tr>
                     <td colspan="3" class="p-3 uppercase text-center font-bold">TOTAL BULANAN</td>
-                    <td class="p-2.5 text-center font-bold">${grandVolPlan}</td>
-                    <td class="p-2.5 text-center font-bold">${grandVolAct}</td>
+                    <td class="p-2.5 text-center font-bold">—</td>
+                    <td class="p-2.5 text-center font-bold">—</td>
                     <td class="p-2.5 text-right font-mono font-bold">${formatRp(grandCostPlan)}</td>
                     <td class="p-2.5 text-right font-mono font-bold">${formatRp(grandCostAct)}</td>
                     <td class="p-2.5 text-center text-primary-700 font-bold">${grandWeightPlan.toFixed(2)}%</td>
@@ -1489,12 +1794,21 @@
 
             weeksList.forEach((w, idx) => {
                 const wKey = `W${idx + 1}`;
-                const wCostPlan = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksPlan && p.weeksPlan[wKey] && p.weeksPlan[wKey].cost) || 0), 0);
-                const wCostAct = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksActual && p.weeksActual[wKey] && p.weeksActual[wKey].cost) || 0), 0);
-                const wCostDev = wCostAct - wCostPlan;
+                let wCostPlan = 0, wCostAct = 0;
+                let wWeightPlan = 0, wWeightAct = 0;
 
-                const wWeightPlan = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksPlan && p.weeksPlan[wKey] && p.weeksPlan[wKey].weight) || 0), 0);
-                const wWeightAct = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksActual && p.weeksActual[wKey] && p.weeksActual[wKey].weight) || 0), 0);
+                activePlans.forEach(p => {
+                    if (p.subtasks) {
+                        p.subtasks.forEach(s => {
+                            wCostPlan += parseFloat((s.weeksPlan && s.weeksPlan[wKey] && s.weeksPlan[wKey].cost) || 0);
+                            wCostAct += parseFloat((s.weeksActual && s.weeksActual[wKey] && s.weeksActual[wKey].cost) || 0);
+                            wWeightPlan += parseFloat((s.weeksPlan && s.weeksPlan[wKey] && s.weeksPlan[wKey].weight) || 0);
+                            wWeightAct += parseFloat((s.weeksActual && s.weeksActual[wKey] && s.weeksActual[wKey].weight) || 0);
+                        });
+                    }
+                });
+
+                const wCostDev = wCostAct - wCostPlan;
                 const wWeightDev = wWeightAct - wWeightPlan;
 
                 grandCostPlan += wCostPlan;
@@ -1558,16 +1872,28 @@
             let datasets = [];
 
             if (appState.resumeChartMode === 'cost') {
-                const costsPlan = weeksList.map((_, idx) => activePlans.reduce((sum, p) => sum + parseFloat((p.weeksPlan && p.weeksPlan[`W${idx+1}`] && p.weeksPlan[`W${idx+1}`].cost) || 0), 0));
-                const costsAct = weeksList.map((_, idx) => activePlans.reduce((sum, p) => sum + parseFloat((p.weeksActual && p.weeksActual[`W${idx+1}`] && p.weeksActual[`W${idx+1}`].cost) || 0), 0));
+                const costsPlan = weeksList.map((_, idx) => {
+                    const wKey = `W${idx + 1}`;
+                    return activePlans.reduce((sum, p) => sum + (p.subtasks ? p.subtasks.reduce((sSum, sub) => sSum + parseFloat((sub.weeksPlan && sub.weeksPlan[wKey] && sub.weeksPlan[wKey].cost) || 0), 0) : 0), 0);
+                });
+                const costsAct = weeksList.map((_, idx) => {
+                    const wKey = `W${idx + 1}`;
+                    return activePlans.reduce((sum, p) => sum + (p.subtasks ? p.subtasks.reduce((sSum, sub) => sSum + parseFloat((sub.weeksActual && sub.weeksActual[wKey] && sub.weeksActual[wKey].cost) || 0), 0) : 0), 0);
+                });
                 
                 datasets = [
                     { label: 'Biaya Rencana (Rp)', data: costsPlan, backgroundColor: '#3b82f6' },
                     { label: 'Biaya Realisasi (Rp)', data: costsAct, backgroundColor: '#f59e0b' }
                 ];
             } else if (appState.resumeChartMode === 'weight') {
-                const weightsPlan = weeksList.map((_, idx) => activePlans.reduce((sum, p) => sum + parseFloat((p.weeksPlan && p.weeksPlan[`W${idx+1}`] && p.weeksPlan[`W${idx+1}`].weight) || 0), 0));
-                const weightsAct = weeksList.map((_, idx) => activePlans.reduce((sum, p) => sum + parseFloat((p.weeksActual && p.weeksActual[`W${idx+1}`] && p.weeksActual[`W${idx+1}`].weight) || 0), 0));
+                const weightsPlan = weeksList.map((_, idx) => {
+                    const wKey = `W${idx + 1}`;
+                    return activePlans.reduce((sum, p) => sum + (p.subtasks ? p.subtasks.reduce((sSum, sub) => sSum + parseFloat((sub.weeksPlan && sub.weeksPlan[wKey] && sub.weeksPlan[wKey].weight) || 0), 0) : 0), 0);
+                });
+                const weightsAct = weeksList.map((_, idx) => {
+                    const wKey = `W${idx + 1}`;
+                    return activePlans.reduce((sum, p) => sum + (p.subtasks ? p.subtasks.reduce((sSum, sub) => sSum + parseFloat((sub.weeksActual && sub.weeksActual[wKey] && sub.weeksActual[wKey].weight) || 0), 0) : 0), 0);
+                });
 
                 datasets = [
                     { label: 'Bobot Rencana (%)', data: weightsPlan, backgroundColor: '#2563eb' },
@@ -1575,8 +1901,9 @@
                 ];
             } else if (appState.resumeChartMode === 'deviation') {
                 const devsWeight = weeksList.map((_, idx) => {
-                    const wp = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksPlan && p.weeksPlan[`W${idx+1}`] && p.weeksPlan[`W${idx+1}`].weight) || 0), 0);
-                    const wa = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksActual && p.weeksActual[`W${idx+1}`] && p.weeksActual[`W${idx+1}`].weight) || 0), 0);
+                    const wKey = `W${idx + 1}`;
+                    const wp = activePlans.reduce((sum, p) => sum + (p.subtasks ? p.subtasks.reduce((sSum, sub) => sSum + parseFloat((sub.weeksPlan && sub.weeksPlan[wKey] && sub.weeksPlan[wKey].weight) || 0), 0) : 0), 0);
+                    const wa = activePlans.reduce((sum, p) => sum + (p.subtasks ? p.subtasks.reduce((sSum, sub) => sSum + parseFloat((sub.weeksActual && sub.weeksActual[wKey] && sub.weeksActual[wKey].weight) || 0), 0) : 0), 0);
                     return wa - wp;
                 });
 
@@ -1606,26 +1933,31 @@
                 return;
             }
 
-            // Find min/max weekly deviations
             let minDevWeek = null, maxDevWeek = null;
             let minDevVal = Infinity, maxDevVal = -Infinity;
 
             weeksList.forEach((w, idx) => {
                 const wKey = `W${idx + 1}`;
-                const wp = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksPlan && p.weeksPlan[wKey] && p.weeksPlan[wKey].weight) || 0), 0);
-                const wa = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksActual && p.weeksActual[wKey] && p.weeksActual[wKey].weight) || 0), 0);
+                let wp = 0, wa = 0;
+                activePlans.forEach(p => {
+                    if (p.subtasks) {
+                        p.subtasks.forEach(s => {
+                            wp += parseFloat((s.weeksPlan && s.weeksPlan[wKey] && s.weeksPlan[wKey].weight) || 0);
+                            wa += parseFloat((s.weeksActual && s.weeksActual[wKey] && s.weeksActual[wKey].weight) || 0);
+                        });
+                    }
+                });
                 const dev = wa - wp;
 
                 if (dev < minDevVal) { minDevVal = dev; minDevWeek = w; }
                 if (dev > maxDevVal) { maxDevVal = dev; maxDevWeek = w; }
             });
 
-            // Find item plans under target & over budget
             const underTargetItems = [];
             const overBudgetItems = [];
 
             activePlans.forEach(p => {
-                const totals = calculatePlanTotals(p, weeksList);
+                const totals = calculateParentPlanTotals(p, weeksList);
                 if (totals.totWeightAct < totals.totWeightPlan) {
                     underTargetItems.push(`${p.name} (Deviasi: ${(totals.totWeightAct - totals.totWeightPlan).toFixed(2)}%)`);
                 }
@@ -1634,7 +1966,7 @@
                 }
             });
 
-            let evalHtml = `<strong class="text-slate-900 font-bold">ANALISIS KINERJA DAN EVALUASI PROYEK:</strong>\n\n`;
+            let evalHtml = `<strong class="text-slate-900 font-bold">ANALISIS KINERJA DAN EVALUASI PROYEK BERDASARKAN SUB PEKERJAAN:</strong>\n\n`;
             
             evalHtml += `1. <strong class="text-slate-800">Evaluasi Capaian Fisik:</strong> Realisasi bobot fisik kumulatif mencapai <span class="font-bold text-emerald-600">${totWeightAct.toFixed(2)}%</span> dari target rencana <span class="font-bold text-primary-600">${totWeightPlan.toFixed(2)}%</span> (Deviasi: <span class="font-bold ${devWeight >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${devWeight >= 0 ? '+' : ''}${devWeight.toFixed(2)}%</span>).\n`;
             if (minDevWeek) evalHtml += `   • Minggu dengan deviasi negatif terbesar: <strong class="text-rose-600">${minDevWeek}</strong> (${minDevVal.toFixed(2)}%).\n`;
@@ -1657,12 +1989,9 @@
 
             evalHtml += `4. <strong class="text-slate-800">Rekomendasi Tindak Lanjut:</strong>\n`;
             if (devWeight < 0) {
-                evalHtml += `   • Lakukan *Catch-up Plan* dengan penambahan jam kerja (lembur) dan peningkatan pasokan sumber daya pada minggu mendatang.\n`;
+                evalHtml += `   • Lakukan *Catch-up Plan* dengan penambahan jam kerja (lembur) dan peningkatan pasokan sumber daya pada sub pekerjaan yang mengalami deviasi negatif.\n`;
             } else {
                 evalHtml += `   • Pertahankan ritme kerja dan koordinasi dengan subkontraktor/vendor untuk menjaga stabilitas progress.\n`;
-            }
-            if (devCost > 0) {
-                evalHtml += `   • Lakukan efisiensi pengeluaran dan audit biaya operasional pada item pekerjaan yang mengalami kenaikan alokasi anggaran.\n`;
             }
 
             evalBox.innerHTML = evalHtml;
@@ -1672,52 +2001,51 @@
             const activePlans = filterPlansByGlobalPeriod();
             const weeksList = getActiveWeeksList(appState.globalYear, appState.globalMonth);
 
-            const itemData = activePlans.map((p, idx) => {
-                const totals = calculatePlanTotals(p, weeksList);
-                return {
+            const exportRows = [];
+            activePlans.forEach((p, idx) => {
+                const pTotals = calculateParentPlanTotals(p, weeksList);
+                exportRows.push({
                     'No': idx + 1,
-                    'Nama Action Plan': p.name,
+                    'Tipe': 'Pekerjaan Utama',
+                    'Nama Pekerjaan': p.name,
                     'Satuan': p.satuan,
-                    'Vol Rencana': totals.totVolPlan,
-                    'Vol Realisasi': totals.totVolAct,
-                    'Biaya Rencana (Rp)': totals.totCostPlan,
-                    'Biaya Realisasi (Rp)': totals.totCostAct,
-                    'Bobot Rencana (%)': totals.totWeightPlan,
-                    'Bobot Realisasi (%)': totals.totWeightAct,
-                    'Deviasi Bobot (%)': totals.totWeightAct - totals.totWeightPlan
-                };
-            });
+                    'Vol Rencana': pTotals.totVolPlan,
+                    'Vol Realisasi': pTotals.totVolAct,
+                    'Biaya Rencana (Rp)': pTotals.totCostPlan,
+                    'Biaya Realisasi (Rp)': pTotals.totCostAct,
+                    'Bobot Rencana (%)': pTotals.totWeightPlan,
+                    'Bobot Realisasi (%)': pTotals.totWeightAct,
+                    'Deviasi Bobot (%)': pTotals.totWeightAct - pTotals.totWeightPlan
+                });
 
-            const weeklyData = weeksList.map((w, idx) => {
-                const wKey = `W${idx + 1}`;
-                const wCostPlan = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksPlan && p.weeksPlan[wKey] && p.weeksPlan[wKey].cost) || 0), 0);
-                const wCostAct = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksActual && p.weeksActual[wKey] && p.weeksActual[wKey].cost) || 0), 0);
-                const wWeightPlan = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksPlan && p.weeksPlan[wKey] && p.weeksPlan[wKey].weight) || 0), 0);
-                const wWeightAct = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksActual && p.weeksActual[wKey] && p.weeksActual[wKey].weight) || 0), 0);
-
-                return {
-                    'Minggu': w,
-                    'Biaya Rencana (Rp)': wCostPlan,
-                    'Biaya Realisasi (Rp)': wCostAct,
-                    'Deviasi Biaya (Rp)': wCostAct - wCostPlan,
-                    'Bobot Rencana (%)': wWeightPlan,
-                    'Bobot Realisasi (%)': wWeightAct,
-                    'Deviasi Bobot (%)': wWeightAct - wWeightPlan
-                };
+                if (p.subtasks) {
+                    p.subtasks.forEach((sub, sIdx) => {
+                        const sTotals = calculateSubtaskTotals(sub, weeksList);
+                        exportRows.push({
+                            'No': `${idx + 1}.${sIdx + 1}`,
+                            'Tipe': 'Sub Pekerjaan',
+                            'Nama Pekerjaan': `↳ ${sub.name}`,
+                            'Satuan': sub.satuan,
+                            'Vol Rencana': sTotals.totVolPlan,
+                            'Vol Realisasi': sTotals.totVolAct,
+                            'Biaya Rencana (Rp)': sTotals.totCostPlan,
+                            'Biaya Realisasi (Rp)': sTotals.totCostAct,
+                            'Bobot Rencana (%)': sTotals.totWeightPlan,
+                            'Bobot Realisasi (%)': sTotals.totWeightAct,
+                            'Deviasi Bobot (%)': sTotals.totWeightAct - sTotals.totWeightPlan
+                        });
+                    });
+                }
             });
 
             const wb = XLSX.utils.book_new();
-            const wsItems = XLSX.utils.json_to_sheet(itemData);
-            const wsWeekly = XLSX.utils.json_to_sheet(weeklyData);
-
-            XLSX.utils.book_append_sheet(wb, wsItems, "Rincian Item Pekerjaan");
-            XLSX.utils.book_append_sheet(wb, wsWeekly, "Monitoring Mingguan");
-
+            const ws = XLSX.utils.json_to_sheet(exportRows);
+            XLSX.utils.book_append_sheet(wb, ws, "Resume Pekerjaan & Sub");
             XLSX.writeFile(wb, `Resume_Action_Plan_${appState.globalYear}_${appState.globalMonth}.xlsx`);
         }
 
         // ==========================================
-        // 10. MODAL CRUD FOR ACTION PLANS
+        // 10. MODAL CRUD FOR ACTION PLANS & SUBTASKS
         // ==========================================
         function openPlanModal(planId = null) {
             populateModalDropdowns();
@@ -1728,25 +2056,28 @@
             if (planId) {
                 const plan = appState.plans.find(p => p.id === planId);
                 if (plan) {
-                    document.getElementById('plan-modal-title').textContent = 'Edit Action Plan Pekerjaan';
+                    document.getElementById('plan-modal-title').textContent = 'Edit Action Plan Utama & Sub Pekerjaan';
                     document.getElementById('modal-plan-id').value = plan.id;
                     document.getElementById('modal-plan-year').value = plan.year;
                     document.getElementById('modal-plan-month').value = plan.month;
-                    document.getElementById('modal-plan-satuan').value = plan.satuan;
+                    document.getElementById('modal-plan-satuan').value = plan.satuan || '';
                     document.getElementById('modal-plan-name').value = plan.name;
                     document.getElementById('modal-plan-divisi').value = plan.divisi;
                     document.getElementById('modal-plan-pic').value = plan.pic;
                     document.getElementById('modal-plan-uraian').value = plan.uraian || '';
-                    renderModalWeeklyInputs(plan);
+                    
+                    // Deep copy subtasks
+                    currentModalSubtasks = JSON.parse(JSON.stringify(plan.subtasks || []));
                 }
             } else {
-                document.getElementById('plan-modal-title').textContent = 'Tambah Action Plan Baru';
+                document.getElementById('plan-modal-title').textContent = 'Tambah Action Plan Utama Baru';
                 document.getElementById('modal-plan-id').value = '';
                 document.getElementById('modal-plan-year').value = appState.globalYear;
                 document.getElementById('modal-plan-month').value = (appState.globalMonth === 'ALL') ? 0 : appState.globalMonth;
-                renderModalWeeklyInputs();
+                currentModalSubtasks = [];
             }
 
+            renderModalSubtasksList();
             modal.classList.remove('hidden');
         }
 
@@ -1777,36 +2108,131 @@
             appState.pics.forEach(p => picSel.innerHTML += `<option value="${p}">${p}</option>`);
         }
 
-        function renderModalWeeklyInputs(existingPlan = null) {
+        function onModalPeriodChanged() {
+            renderModalSubtasksList();
+        }
+
+        function addModalSubtaskRow() {
             const year = parseInt(document.getElementById('modal-plan-year').value || appState.globalYear);
             const month = parseInt(document.getElementById('modal-plan-month').value || 0);
             const weeksList = getActiveWeeksList(year, month);
 
-            const container = document.getElementById('modal-weekly-inputs-container');
+            const newSubId = `sub-${Date.now()}-${currentModalSubtasks.length + 1}`;
+            const weeksPlan = {};
+            const weeksActual = {};
+
+            weeksList.forEach((_, idx) => {
+                const wKey = `W${idx + 1}`;
+                weeksPlan[wKey] = { vol: 0, cost: 0, weight: 0 };
+                weeksActual[wKey] = { vol: 0, cost: 0, weight: 0 };
+            });
+
+            currentModalSubtasks.push({
+                id: newSubId,
+                name: `Sub Pekerjaan Baru ${currentModalSubtasks.length + 1}`,
+                satuan: 'M2',
+                weeksPlan,
+                weeksActual
+            });
+
+            renderModalSubtasksList();
+        }
+
+        function removeModalSubtaskRow(subId) {
+            currentModalSubtasks = currentModalSubtasks.filter(s => s.id !== subId);
+            renderModalSubtasksList();
+        }
+
+        function renderModalSubtasksList() {
+            const year = parseInt(document.getElementById('modal-plan-year').value || appState.globalYear);
+            const month = parseInt(document.getElementById('modal-plan-month').value || 0);
+            const weeksList = getActiveWeeksList(year, month);
+
+            const container = document.getElementById('modal-subtasks-list-container');
             container.innerHTML = '';
 
-            weeksList.forEach((w, idx) => {
-                const wKey = `W${idx + 1}`;
-                const wp = (existingPlan && existingPlan.weeksPlan && existingPlan.weeksPlan[wKey]) || { vol: 0, cost: 0, weight: 0 };
+            if (currentModalSubtasks.length === 0) {
+                container.innerHTML = `
+                    <div class="p-4 text-center border border-dashed border-slate-300 rounded-lg text-slate-400">
+                        Belum ada Sub Pekerjaan. Klik <strong>+ Tambah Sub Pekerjaan</strong> untuk menguraikan pekerjaan ini.
+                    </div>
+                `;
+                return;
+            }
 
-                container.innerHTML += `
-                    <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg grid grid-cols-3 gap-2">
-                        <div class="col-span-3 font-semibold text-slate-700 text-[11px]">${w}</div>
-                        <div>
-                            <label class="text-[10px] text-slate-500">Volume</label>
-                            <input type="number" step="any" id="modal-w-vol-${wKey}" value="${wp.vol}" class="w-full px-2 py-1 border border-slate-300 rounded">
+            currentModalSubtasks.forEach((sub, sIdx) => {
+                let subHtml = `
+                    <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="font-bold text-slate-800 text-xs">Sub Pekerjaan #${sIdx + 1}</span>
+                            <button type="button" onclick="removeModalSubtaskRow('${sub.id}')" class="text-rose-600 hover:text-rose-800 text-xs font-semibold">
+                                <i class="fa-solid fa-trash"></i> Hapus Sub
+                            </button>
                         </div>
-                        <div>
-                            <label class="text-[10px] text-slate-500">Biaya (Rp)</label>
-                            <input type="number" step="any" id="modal-w-cost-${wKey}" value="${wp.cost}" class="w-full px-2 py-1 border border-slate-300 rounded">
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <div class="sm:col-span-2">
+                                <label class="text-[10px] font-semibold text-slate-600">Nama Sub Pekerjaan</label>
+                                <input type="text" value="${sub.name}" onchange="updateModalSubtaskField('${sub.id}', 'name', this.value)" class="w-full px-2 py-1 border border-slate-300 rounded text-xs">
+                            </div>
+                            <div>
+                                <label class="text-[10px] font-semibold text-slate-600">Satuan</label>
+                                <input type="text" value="${sub.satuan}" onchange="updateModalSubtaskField('${sub.id}', 'satuan', this.value)" class="w-full px-2 py-1 border border-slate-300 rounded text-xs">
+                            </div>
                         </div>
-                        <div>
-                            <label class="text-[10px] text-slate-500">Bobot (%)</label>
-                            <input type="number" step="any" id="modal-w-weight-${wKey}" value="${wp.weight}" class="w-full px-2 py-1 border border-slate-300 rounded font-semibold text-primary-600">
+
+                        <!-- Weekly Distribution Matrix inside Subtask Card -->
+                        <div class="border-t border-slate-200 pt-2 space-y-1">
+                            <label class="text-[10px] font-bold text-primary-700">Distribusi Rencana Mingguan:</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                `;
+
+                weeksList.forEach((w, wIdx) => {
+                    const wKey = `W${wIdx + 1}`;
+                    const wp = (sub.weeksPlan && sub.weeksPlan[wKey]) || { vol: 0, cost: 0, weight: 0 };
+
+                    subHtml += `
+                        <div class="p-2 bg-white border border-slate-200 rounded">
+                            <div class="font-bold text-[10px] text-slate-700 mb-1">${w}</div>
+                            <div class="space-y-1">
+                                <div>
+                                    <span class="text-[9px] text-slate-400">Vol:</span>
+                                    <input type="number" step="any" value="${wp.vol}" onchange="updateModalSubtaskWeeklyField('${sub.id}', '${wKey}', 'vol', this.value)" class="w-full px-1 py-0.5 border border-slate-200 rounded text-[10px]">
+                                </div>
+                                <div>
+                                    <span class="text-[9px] text-slate-400">Biaya (Rp):</span>
+                                    <input type="number" step="any" value="${wp.cost}" onchange="updateModalSubtaskWeeklyField('${sub.id}', '${wKey}', 'cost', this.value)" class="w-full px-1 py-0.5 border border-slate-200 rounded text-[10px]">
+                                </div>
+                                <div>
+                                    <span class="text-[9px] text-slate-400">Bobot (%):</span>
+                                    <input type="number" step="any" value="${wp.weight}" onchange="updateModalSubtaskWeeklyField('${sub.id}', '${wKey}', 'weight', this.value)" class="w-full px-1 py-0.5 border border-slate-200 rounded text-[10px] font-semibold text-primary-600">
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                subHtml += `
+                            </div>
                         </div>
                     </div>
                 `;
+
+                container.innerHTML += subHtml;
             });
+        }
+
+        function updateModalSubtaskField(subId, field, val) {
+            const sub = currentModalSubtasks.find(s => s.id === subId);
+            if (sub) sub[field] = val;
+        }
+
+        function updateModalSubtaskWeeklyField(subId, weekKey, field, val) {
+            const sub = currentModalSubtasks.find(s => s.id === subId);
+            if (!sub) return;
+            if (!sub.weeksPlan) sub.weeksPlan = {};
+            if (!sub.weeksPlan[weekKey]) sub.weeksPlan[weekKey] = { vol: 0, cost: 0, weight: 0 };
+            sub.weeksPlan[weekKey][field] = parseFloat(val || 0);
         }
 
         function savePlanModal(e) {
@@ -1820,37 +2246,22 @@
             const pic = document.getElementById('modal-plan-pic').value;
             const uraian = document.getElementById('modal-plan-uraian').value;
 
-            const weeksList = getActiveWeeksList(year, month);
-            const weeksPlan = {};
-            const weeksActual = {};
-
-            weeksList.forEach((_, idx) => {
-                const wKey = `W${idx + 1}`;
-                const vol = parseFloat(document.getElementById(`modal-w-vol-${wKey}`).value || 0);
-                const cost = parseFloat(document.getElementById(`modal-w-cost-${wKey}`).value || 0);
-                const weight = parseFloat(document.getElementById(`modal-w-weight-${wKey}`).value || 0);
-
-                weeksPlan[wKey] = { vol, cost, weight };
-                
-                // Preserve actual if exists
-                let existingPlan = appState.plans.find(p => p.id === id);
-                if (existingPlan && existingPlan.weeksActual && existingPlan.weeksActual[wKey]) {
-                    weeksActual[wKey] = existingPlan.weeksActual[wKey];
-                } else {
-                    weeksActual[wKey] = { vol: 0, cost: 0, weight: 0 };
-                }
-            });
-
             if (id) {
-                // Edit
+                // Edit existing parent
                 const idx = appState.plans.findIndex(p => p.id === id);
                 if (idx !== -1) {
-                    appState.plans[idx] = { id, year, month, name, satuan, divisi, pic, uraian, weeksPlan, weeksActual };
+                    appState.plans[idx] = {
+                        id, year, month, name, satuan, divisi, pic, uraian,
+                        subtasks: JSON.parse(JSON.stringify(currentModalSubtasks))
+                    };
                 }
             } else {
-                // Add New
+                // Add new parent
                 const newId = `plan-${Date.now()}`;
-                appState.plans.push({ id: newId, year, month, name, satuan, divisi, pic, uraian, weeksPlan, weeksActual });
+                appState.plans.push({
+                    id: newId, year, month, name, satuan, divisi, pic, uraian,
+                    subtasks: JSON.parse(JSON.stringify(currentModalSubtasks))
+                });
             }
 
             saveStateToStorage();
@@ -1859,7 +2270,7 @@
         }
 
         function deletePlan(planId) {
-            if (confirm('Apakah Anda yakin ingin menghapus Action Plan ini?')) {
+            if (confirm('Apakah Anda yakin ingin menghapus Action Plan Utama ini beserta seluruh Sub Pekerjaannya?')) {
                 appState.plans = appState.plans.filter(p => p.id !== planId);
                 saveStateToStorage();
                 refreshActivePanel();
@@ -1933,31 +2344,58 @@
             const activePlans = filterPlansByGlobalPeriod();
             const weeksList = getActiveWeeksList(appState.globalYear, appState.globalMonth);
 
-            const exportData = activePlans.map((p, idx) => {
-                const totals = calculatePlanTotals(p, weeksList);
-                let row = {
+            const exportData = [];
+            activePlans.forEach((p, idx) => {
+                const parentTotals = calculateParentPlanTotals(p, weeksList);
+                let parentRow = {
                     'No': idx + 1,
-                    'Nama Action Plan': p.name,
-                    'Satuan': p.satuan,
-                    'Divisi': p.divisi,
-                    'PIC': p.pic,
-                    'Total Vol': (type === 'rencana') ? totals.totVolPlan : totals.totVolAct,
-                    'Total Biaya (Rp)': (type === 'rencana') ? totals.totCostPlan : totals.totCostAct,
-                    'Total Bobot (%)': (type === 'rencana') ? totals.totWeightPlan : totals.totWeightAct
+                    'Tipe': 'Pekerjaan Utama',
+                    'Nama Pekerjaan': p.name,
+                    'Satuan': parentTotals.satuan,
+                    'Total Vol': (type === 'rencana') ? parentTotals.totVolPlan : parentTotals.totVolAct,
+                    'Total Biaya (Rp)': (type === 'rencana') ? parentTotals.totCostPlan : parentTotals.totCostAct,
+                    'Total Bobot (%)': (type === 'rencana') ? parentTotals.totWeightPlan : parentTotals.totWeightAct
                 };
 
                 weeksList.forEach((w, wIdx) => {
                     const wKey = `W${wIdx + 1}`;
-                    const targetData = (type === 'rencana') 
-                        ? (p.weeksPlan && p.weeksPlan[wKey]) || { vol: 0, cost: 0, weight: 0 }
-                        : (p.weeksActual && p.weeksActual[wKey]) || { vol: 0, cost: 0, weight: 0 };
-
-                    row[`${w} Vol`] = targetData.vol;
-                    row[`${w} Biaya`] = targetData.cost;
-                    row[`${w} Bobot (%)`] = targetData.weight;
+                    let wCost = 0, wWeight = 0;
+                    if (p.subtasks) {
+                        p.subtasks.forEach(s => {
+                            const target = (type === 'rencana') ? (s.weeksPlan && s.weeksPlan[wKey]) : (s.weeksActual && s.weeksActual[wKey]);
+                            if (target) {
+                                wCost += parseFloat(target.cost || 0);
+                                wWeight += parseFloat(target.weight || 0);
+                            }
+                        });
+                    }
+                    parentRow[`${w} Biaya`] = wCost;
+                    parentRow[`${w} Bobot (%)`] = wWeight;
                 });
+                exportData.push(parentRow);
 
-                return row;
+                if (p.subtasks) {
+                    p.subtasks.forEach((sub, sIdx) => {
+                        const subTotals = calculateSubtaskTotals(sub, weeksList);
+                        let subRow = {
+                            'No': `${idx + 1}.${sIdx + 1}`,
+                            'Tipe': 'Sub Pekerjaan',
+                            'Nama Pekerjaan': `  ↳ ${sub.name}`,
+                            'Satuan': sub.satuan,
+                            'Total Vol': (type === 'rencana') ? subTotals.totVolPlan : subTotals.totVolAct,
+                            'Total Biaya (Rp)': (type === 'rencana') ? subTotals.totCostPlan : subTotals.totCostAct,
+                            'Total Bobot (%)': (type === 'rencana') ? subTotals.totWeightPlan : subTotals.totWeightAct
+                        };
+
+                        weeksList.forEach((w, wIdx) => {
+                            const wKey = `W${wIdx + 1}`;
+                            const target = (type === 'rencana') ? (sub.weeksPlan && sub.weeksPlan[wKey]) : (sub.weeksActual && sub.weeksActual[wKey]);
+                            subRow[`${w} Biaya`] = target ? target.cost : 0;
+                            subRow[`${w} Bobot (%)`] = target ? target.weight : 0;
+                        });
+                        exportData.push(subRow);
+                    });
+                }
             });
 
             const ws = XLSX.utils.json_to_sheet(exportData);
@@ -2001,7 +2439,7 @@
 
         function resetAllSystemData() {
             if (confirm('Apakah Anda benar-benar yakin ingin mereset seluruh data?')) {
-                localStorage.removeItem('action_plan_app_state_v4');
+                localStorage.removeItem('action_plan_app_state_v5');
                 loadDefaultSampleData();
                 alert('Data berhasil di-reset ke default.');
                 location.reload();
