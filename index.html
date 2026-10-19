@@ -1,0 +1,2012 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Monitoring Progress Action Plan</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS CDN (Excel Export/Import) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd',
+                            400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+                            800: '#1e40af', 900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar for Horizontal Matrix Tables */
+        .table-matrix-container::-webkit-scrollbar {
+            height: 10px;
+            width: 8px;
+        }
+        .table-matrix-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .table-matrix-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .table-matrix-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        /* Sticky Left Column Identifiers */
+        .sticky-col-1 { position: sticky; left: 0; z-index: 20; background-color: inherit; }
+        .sticky-col-2 { position: sticky; left: 48px; z-index: 20; background-color: inherit; }
+        .sticky-col-3 { position: sticky; left: 240px; z-index: 20; background-color: inherit; }
+        
+        /* Print Styles */
+        @media print {
+            body { background: white !important; color: black !important; font-size: 11px; }
+            .no-print, sidebar, nav, .btn-action, button, .filter-bar { display: none !important; }
+            main { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+            .print-only { display: block !important; }
+            .card-box { border: 1px solid #ccc !important; shadow: none !important; break-inside: avoid; }
+            .table-matrix-container { overflow: visible !important; }
+            table { width: 100% !important; border-collapse: collapse !important; }
+            th, td { border: 1px solid #666 !important; padding: 4px 6px !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased font-sans min-h-screen flex flex-col md:flex-row">
+
+    <!-- SIDEBAR NAVIGATION -->
+    <aside id="sidebar" class="w-full md:w-64 bg-slate-900 text-slate-300 flex-shrink-0 flex flex-col justify-between z-30 transition-all duration-300 no-print">
+        <div>
+            <!-- Logo / Header -->
+            <div class="p-5 border-b border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-primary-600 text-white flex items-center justify-center font-bold text-xl shadow-lg shadow-primary-500/30">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-white text-base leading-tight">Action Plan Pro</h1>
+                        <span class="text-xs text-slate-400">Monitoring System</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="p-3 space-y-1">
+                <a href="#" onclick="switchPanel('dashboard')" id="nav-dashboard" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-sm transition-colors text-white bg-primary-600">
+                    <i class="fa-solid fa-gauge-high w-5 text-center"></i> Dashboard Monitoring
+                </a>
+                <a href="#" onclick="switchPanel('rencana')" id="nav-rencana" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-sm transition-colors hover:bg-slate-800 hover:text-white">
+                    <i class="fa-solid fa-list-check w-5 text-center"></i> Rencana Action Plan
+                </a>
+                <a href="#" onclick="switchPanel('realisasi')" id="nav-realisasi" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-sm transition-colors hover:bg-slate-800 hover:text-white">
+                    <i class="fa-solid fa-bars-progress w-5 text-center"></i> Realisasi Action Plan
+                </a>
+                <a href="#" onclick="switchPanel('resume')" id="nav-resume" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-sm transition-colors hover:bg-slate-800 hover:text-white">
+                    <i class="fa-solid fa-file-invoice w-5 text-center"></i> Resume Bulanan
+                </a>
+                <a href="#" onclick="switchPanel('master')" id="nav-master" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-sm transition-colors hover:bg-slate-800 hover:text-white">
+                    <i class="fa-solid fa-database w-5 text-center"></i> Data Master
+                </a>
+                <a href="#" onclick="switchPanel('pengaturan')" id="nav-pengaturan" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-sm transition-colors hover:bg-slate-800 hover:text-white">
+                    <i class="fa-solid fa-gears w-5 text-center"></i> Pengaturan
+                </a>
+            </nav>
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
+            &copy; 2026 PT Nindya Karya (Persero)<br>
+            Infrastructure 2 Division
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-x-hidden">
+        
+        <!-- TOP APP HEADER -->
+        <header class="bg-white border-b border-slate-200 px-6 py-4 flex flex-wrap items-center justify-between gap-4 no-print shadow-sm">
+            <div>
+                <h2 id="current-panel-title" class="text-xl font-bold text-slate-800">Dashboard Monitoring</h2>
+                <p id="current-panel-subtitle" class="text-xs text-slate-500">Ringkasan evaluasi dan pencapaian Action Plan secara holistik.</p>
+            </div>
+
+            <!-- GLOBAL PERIOD SELECTOR BAR -->
+            <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-xl border border-slate-200 filter-bar flex-wrap">
+                <div class="flex items-center gap-1 text-slate-600 px-2 text-xs font-semibold">
+                    <i class="fa-regular fa-calendar-days text-primary-600"></i> Periode:
+                </div>
+                <select id="global-year-select" onchange="onGlobalPeriodChange()" class="bg-white text-xs font-semibold border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <!-- Years Options populated dynamically -->
+                </select>
+                <select id="global-month-select" onchange="onGlobalPeriodChange()" class="bg-white text-xs font-semibold border border-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary-500">
+                    <!-- Months Options populated dynamically -->
+                </select>
+                <button onclick="resetGlobalPeriod()" title="Reset Filter" class="px-2.5 py-1.5 text-xs bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg transition font-medium flex items-center gap-1">
+                    <i class="fa-solid fa-rotate-right"></i> Reset Filter
+                </button>
+            </div>
+        </header>
+
+        <!-- CONTENT PANELS CONTAINER -->
+        <div class="p-6 space-y-6 flex-1">
+
+            <!-- 1. PANEL DASHBOARD MONITORING -->
+            <section id="panel-dashboard" class="panel-content space-y-6">
+                <!-- Summary KPI Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Action Plan</span>
+                            <div id="kpi-total-plans" class="text-2xl font-bold text-slate-800 mt-1">0 Pekerjaan</div>
+                            <span id="kpi-total-weight" class="text-xs text-primary-600 font-medium">100% Target Bobot</span>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center text-xl font-bold">
+                            <i class="fa-solid fa-list-check"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Realisasi Aktual</span>
+                            <div id="kpi-realization-pct" class="text-2xl font-bold text-emerald-600 mt-1">0.00%</div>
+                            <span id="kpi-realization-deviation" class="text-xs text-slate-500 font-medium">Deviasi: 0.00%</span>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Anggaran Rencana</span>
+                            <div id="kpi-plan-cost" class="text-xl font-bold text-slate-800 mt-1">Rp 0</div>
+                            <span class="text-xs text-slate-400">Total Biaya Terjadwal</span>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl font-bold">
+                            <i class="fa-solid fa-wallet"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Realisasi Biaya Aktual</span>
+                            <div id="kpi-actual-cost" class="text-xl font-bold text-amber-600 mt-1">Rp 0</div>
+                            <span id="kpi-cost-dev" class="text-xs text-slate-500">Penyerapan Anggaran</span>
+                        </div>
+                        <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl font-bold">
+                            <i class="fa-solid fa-hand-holding-dollar"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Breakdown Badges Card -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-slate-500 uppercase">Status Pekerjaan:</span>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3 text-xs font-medium">
+                        <span class="px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check text-emerald-500"></i> Selesai (100%): <strong id="status-cnt-selesai">0</strong>
+                        </span>
+                        <span class="px-3 py-1.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-spinner text-amber-500"></i> Sedang Berjalan: <strong id="status-cnt-berjalan">0</strong>
+                        </span>
+                        <span class="px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 flex items-center gap-1.5">
+                            <i class="fa-regular fa-clock text-slate-400"></i> Belum Dimulai: <strong id="status-cnt-belum">0</strong>
+                        </span>
+                        <span class="px-3 py-1.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-triangle-exclamation text-rose-500"></i> Terlambat: <strong id="status-cnt-terlambat">0</strong>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Charts Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Chart 1: Plan vs Actual Weight per Week -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-chart-column text-primary-600"></i> Target vs Realisasi Bobot per Minggu (%)
+                            </h3>
+                            <span class="text-xs text-slate-400" id="chart1-period-lbl">Periode Aktif</span>
+                        </div>
+                        <div class="h-64 relative">
+                            <canvas id="chart-weekly-progress"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 2: Status Distribution Pie Chart -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-chart-pie text-emerald-600"></i> Distribusi Status Action Plan
+                            </h3>
+                            <span class="text-xs text-slate-400">Kategori Pekerjaan</span>
+                        </div>
+                        <div class="h-64 relative flex items-center justify-center">
+                            <canvas id="chart-status-pie"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 3: Monthly Progress Trend -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-chart-line text-blue-600"></i> Tren Pencapaian Realisasi Bulan ke Bulan
+                            </h3>
+                            <span class="text-xs text-slate-400">Kumulatif Tahun ini</span>
+                        </div>
+                        <div class="h-64 relative">
+                            <canvas id="chart-monthly-trend"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Chart 4: Cost Plan vs Actual Comparison -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-money-bill-trend-up text-amber-600"></i> Penyerapan Biaya Rencana vs Realisasi (Rp)
+                            </h3>
+                            <span class="text-xs text-slate-400">Alokasi Biaya</span>
+                        </div>
+                        <div class="h-64 relative">
+                            <canvas id="chart-cost-comparison"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. PANEL RENCANA ACTION PLAN -->
+            <section id="panel-rencana" class="panel-content hidden space-y-4">
+                <!-- Panel Action Header -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-bold bg-primary-50 text-primary-700 px-3 py-1.5 rounded-lg border border-primary-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-calendar text-primary-500"></i> Periode: <span id="lbl-rencana-period">Januari 2026</span>
+                        </span>
+                        <input type="text" id="search-rencana" onkeyup="renderRencanaTable()" placeholder="Cari Nama / Satuan Action Plan..." class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 w-48 sm:w-64">
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button onclick="openPlanModal()" class="px-3.5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-plus"></i> Tambah Action Plan
+                        </button>
+                        <button onclick="addWeekToCurrentPeriod()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-calendar-plus"></i> + Tambah Minggu
+                        </button>
+                        <button onclick="exportMatrixExcel('rencana')" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1">
+                            <i class="fa-solid fa-file-excel"></i> Excel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Matrix Table Container (Horizontal Dynamic Weeks) -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="table-matrix-container overflow-x-auto max-h-[600px]">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <!-- Multi-level Grouped Header -->
+                            <thead class="bg-slate-800 text-white sticky top-0 z-30">
+                                <tr id="rencana-header-row-1">
+                                    <!-- Row 1: Identifiers & Dynamic Weeks Headers populated by JS -->
+                                </tr>
+                                <tr id="rencana-header-row-2" class="bg-slate-700 text-slate-200 text-[11px]">
+                                    <!-- Row 2: Sub-columns (Vol, Jumlah, Bobot) populated by JS -->
+                                </tr>
+                            </thead>
+                            <tbody id="rencana-table-body" class="divide-y divide-slate-200 bg-white">
+                                <!-- Data rows rendered dynamically -->
+                            </tbody>
+                            <tfoot id="rencana-table-foot" class="bg-slate-100 font-bold border-t-2 border-slate-300 text-slate-800 sticky bottom-0 z-20">
+                                <!-- Foot totals rendered dynamically -->
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. PANEL REALISASI ACTION PLAN -->
+            <section id="panel-realisasi" class="panel-content hidden space-y-4">
+                <!-- Panel Action Header -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-bold bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1.5">
+                            <i class="fa-solid fa-calendar text-emerald-500"></i> Periode: <span id="lbl-realisasi-period">Januari 2026</span>
+                        </span>
+                        <input type="text" id="search-realisasi" onkeyup="renderRealisasiTable()" placeholder="Cari Realisasi Action Plan..." class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 w-48 sm:w-64">
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button onclick="exportMatrixExcel('realisasi')" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1">
+                            <i class="fa-solid fa-file-excel"></i> Ekspor Excel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Matrix Table Container (Realisasi) -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="table-matrix-container overflow-x-auto max-h-[600px]">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead class="bg-slate-800 text-white sticky top-0 z-30">
+                                <tr id="realisasi-header-row-1">
+                                    <!-- Populated dynamically -->
+                                </tr>
+                                <tr id="realisasi-header-row-2" class="bg-slate-700 text-slate-200 text-[11px]">
+                                    <!-- Populated dynamically -->
+                                </tr>
+                            </thead>
+                            <tbody id="realisasi-table-body" class="divide-y divide-slate-200 bg-white">
+                                <!-- Data rows -->
+                            </tbody>
+                            <tfoot id="realisasi-table-foot" class="bg-slate-100 font-bold border-t-2 border-slate-300 text-slate-800 sticky bottom-0 z-20">
+                                <!-- Footer summary -->
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. PANEL RESUME BULANAN -->
+            <section id="panel-resume" class="panel-content hidden space-y-6">
+                <!-- Panel Header Bar & Filter Active Period -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3 no-print">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                            <i class="fa-solid fa-file-invoice text-primary-600"></i> Resume Action Plan — <span id="lbl-resume-active-period">Maret 2026</span>
+                        </h3>
+                        <p class="text-xs text-slate-500">Rincian item pekerjaan, perbandingan Rencana vs Realisasi mingguan, serta evaluasi otomatis.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="exportResumeExcel()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition flex items-center gap-1">
+                            <i class="fa-solid fa-file-excel"></i> Ekspor Excel
+                        </button>
+                        <button onclick="window.print()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold shadow-sm transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-print"></i> Cetak Laporan PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Printable Resume Sheet Container -->
+                <div class="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-8 card-box">
+                    <!-- Report Document Header (Print Visible) -->
+                    <div class="border-b border-slate-300 pb-4 flex justify-between items-start">
+                        <div>
+                            <h1 class="text-2xl font-bold text-slate-900 uppercase tracking-tight">LAPORAN EVALUASI & RESUME ACTION PLAN</h1>
+                            <p class="text-sm font-semibold text-primary-700 mt-1" id="resume-doc-period">PERIODE: MARET 2026</p>
+                            <p class="text-xs text-slate-500">Divisi Infrastruktur 2 - PT Nindya Karya (Persero)</p>
+                        </div>
+                        <div class="text-right text-xs text-slate-500">
+                            <div>Tanggal Cetak: <span id="resume-doc-date">19/10/2026</span></div>
+                            <div class="font-semibold text-slate-700">Status: Dokumen Resmi</div>
+                        </div>
+                    </div>
+
+                    <!-- 1. RINGKASAN PENCAAPAIAN BULANAN (6 KPI CARDS) -->
+                    <div>
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-chart-simple text-primary-600"></i> 1. Ringkasan Pencapaian Bulanan
+                        </h4>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-center">
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                                <span class="text-[10px] text-slate-500 font-semibold uppercase">Biaya Rencana</span>
+                                <div id="res-kpi-cost-plan" class="text-sm font-bold text-slate-800 mt-1">Rp 0</div>
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                                <span class="text-[10px] text-slate-500 font-semibold uppercase">Biaya Realisasi</span>
+                                <div id="res-kpi-cost-act" class="text-sm font-bold text-amber-600 mt-1">Rp 0</div>
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                                <span class="text-[10px] text-slate-500 font-semibold uppercase">Deviasi Biaya</span>
+                                <div id="res-kpi-cost-dev" class="text-sm font-bold text-slate-700 mt-1">Rp 0</div>
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                                <span class="text-[10px] text-slate-500 font-semibold uppercase">Bobot Rencana</span>
+                                <div id="res-kpi-weight-plan" class="text-sm font-bold text-primary-600 mt-1">0.00%</div>
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                                <span class="text-[10px] text-slate-500 font-semibold uppercase">Bobot Realisasi</span>
+                                <div id="res-kpi-weight-act" class="text-sm font-bold text-emerald-600 mt-1">0.00%</div>
+                            </div>
+                            <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                                <span class="text-[10px] text-slate-500 font-semibold uppercase">Deviasi Bobot</span>
+                                <div id="res-kpi-weight-dev" class="text-sm font-bold text-slate-700 mt-1">0.00%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. RINCIAN ITEM PEKERJAAN -->
+                    <div class="space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-list text-primary-600"></i> 2. Rincian Item Pekerjaan (Bulanan)
+                            </h4>
+                            <input type="text" id="search-resume-items" onkeyup="renderResumeItemsTable()" placeholder="Cari Item Pekerjaan..." class="px-2.5 py-1 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary-500 no-print w-48">
+                        </div>
+                        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-slate-800 text-white font-semibold">
+                                    <tr>
+                                        <th class="p-2.5 text-center w-10 border-r border-slate-700">No.</th>
+                                        <th class="p-2.5 border-r border-slate-700 min-w-[200px]">Nama Action Plan</th>
+                                        <th class="p-2.5 text-center border-r border-slate-700 w-16">Satuan</th>
+                                        <th class="p-2.5 text-center border-r border-slate-700">Vol Rencana</th>
+                                        <th class="p-2.5 text-center border-r border-slate-700">Vol Realisasi</th>
+                                        <th class="p-2.5 text-right border-r border-slate-700">Biaya Rencana (Rp)</th>
+                                        <th class="p-2.5 text-right border-r border-slate-700">Biaya Realisasi (Rp)</th>
+                                        <th class="p-2.5 text-center border-r border-slate-700">Bobot Rencana (%)</th>
+                                        <th class="p-2.5 text-center border-r border-slate-700">Bobot Realisasi (%)</th>
+                                        <th class="p-2.5 text-center">Deviasi Bobot (%)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="resume-items-tbody" class="divide-y divide-slate-200">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                                <tfoot id="resume-items-tfoot" class="bg-slate-100 font-bold border-t-2 border-slate-300 text-slate-800">
+                                    <!-- Total row -->
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 3. MONITORING RENCANA VS REALISASI MINGGUAN -->
+                    <div class="space-y-3">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-table-list text-primary-600"></i> 3. Monitoring Rencana vs Realisasi Mingguan
+                        </h4>
+                        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                            <table class="w-full text-left text-xs">
+                                <thead class="bg-slate-800 text-white font-semibold">
+                                    <tr>
+                                        <th class="p-2.5 border-r border-slate-700">Minggu</th>
+                                        <th class="p-2.5 text-right border-r border-slate-700">Biaya Rencana (Rp)</th>
+                                        <th class="p-2.5 text-right border-r border-slate-700">Biaya Realisasi (Rp)</th>
+                                        <th class="p-2.5 text-right border-r border-slate-700">Deviasi Biaya (Rp)</th>
+                                        <th class="p-2.5 text-center border-r border-slate-700">Bobot Rencana (%)</th>
+                                        <th class="p-2.5 text-center border-r border-slate-700">Bobot Realisasi (%)</th>
+                                        <th class="p-2.5 text-center">Deviasi Bobot (%)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="resume-weekly-tbody" class="divide-y divide-slate-200">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                                <tfoot id="resume-weekly-tfoot" class="bg-slate-100 font-bold border-t-2 border-slate-300 text-slate-800">
+                                    <!-- Total row -->
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 4. GRAFIK PERBANDINGAN MINGGUAN -->
+                    <div class="space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                                <i class="fa-solid fa-chart-column text-primary-600"></i> 4. Grafik Perbandingan Mingguan
+                            </h4>
+                            <div class="flex items-center gap-1 no-print">
+                                <button onclick="setResumeChartMode('cost')" id="btn-chart-cost" class="px-2.5 py-1 text-xs rounded bg-primary-600 text-white font-medium">Grafik Biaya (Rp)</button>
+                                <button onclick="setResumeChartMode('weight')" id="btn-chart-weight" class="px-2.5 py-1 text-xs rounded bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium">Grafik Bobot (%)</button>
+                                <button onclick="setResumeChartMode('deviation')" id="btn-chart-dev" class="px-2.5 py-1 text-xs rounded bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium">Grafik Deviasi (%)</button>
+                            </div>
+                        </div>
+                        <div class="h-64 border border-slate-200 rounded-xl p-4 bg-slate-50 relative">
+                            <canvas id="chart-resume-weekly"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- 5. KESIMPULAN DAN EVALUASI BULANAN -->
+                    <div class="space-y-3">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-file-pen text-primary-600"></i> 5. Kesimpulan dan Evaluasi Bulanan
+                        </h4>
+                        <div id="resume-evaluation-box" class="p-5 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed whitespace-pre-line font-sans">
+                            Memuat analisis evaluasi...
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. PANEL DATA MASTER -->
+            <section id="panel-master" class="panel-content hidden space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Master Division -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center justify-between">
+                            <span><i class="fa-solid fa-sitemap text-primary-600"></i> Master Divisi / Unit Kerja</span>
+                        </h3>
+                        <div class="flex gap-2">
+                            <input type="text" id="input-new-division" placeholder="Nama Divisi Baru..." class="flex-1 px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            <button onclick="addMasterDivision()" class="px-3 py-1.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded-lg transition">
+                                Tambah
+                            </button>
+                        </div>
+                        <ul id="master-division-list" class="divide-y divide-slate-100 text-xs max-h-48 overflow-y-auto">
+                            <!-- Populated dynamically -->
+                        </ul>
+                    </div>
+
+                    <!-- Master PIC -->
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <h3 class="font-bold text-slate-800 text-sm flex items-center justify-between">
+                            <span><i class="fa-solid fa-user-gear text-emerald-600"></i> Master PIC / Penanggung Jawab</span>
+                        </h3>
+                        <div class="flex gap-2">
+                            <input type="text" id="input-new-pic" placeholder="Nama PIC Baru..." class="flex-1 px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <button onclick="addMasterPIC()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition">
+                                Tambah
+                            </button>
+                        </div>
+                        <ul id="master-pic-list" class="divide-y divide-slate-100 text-xs max-h-48 overflow-y-auto">
+                            <!-- Populated dynamically -->
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. PANEL PENGATURAN -->
+            <section id="panel-pengaturan" class="panel-content hidden space-y-6">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6 max-w-3xl">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-base">Pengaturan & Backup System</h3>
+                        <p class="text-xs text-slate-500">Kelola penyimpan data lokal browser, ekspor cadangan JSON, serta reset data bawaan.</p>
+                    </div>
+
+                    <div class="space-y-4 pt-4 border-t border-slate-100">
+                        <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">1. Cadangan Data (JSON)</h4>
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="exportBackupJSON()" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-xs font-semibold rounded-lg transition flex items-center gap-2">
+                                <i class="fa-solid fa-download"></i> Unduh Backup Data JSON
+                            </button>
+                            <label class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition cursor-pointer flex items-center gap-2">
+                                <i class="fa-solid fa-upload"></i> Restore Data dari JSON
+                                <input type="file" id="restore-json-file" accept=".json" onchange="importBackupJSON(event)" class="hidden">
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 pt-4 border-t border-slate-100">
+                        <h4 class="text-xs font-bold text-rose-600 uppercase tracking-wider">2. Reset System Data</h4>
+                        <p class="text-xs text-slate-500">Menghapus seluruh data Action Plan lokal dan mengembalikan ke sampel awal bawaan.</p>
+                        <button onclick="resetAllSystemData()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold rounded-lg transition flex items-center gap-2">
+                            <i class="fa-solid fa-trash-can"></i> Reset Seluruh Data ke Default
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- MODAL FORM PLAN (ADD/EDIT ACTION PLAN) -->
+    <div id="plan-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="px-6 py-4 bg-slate-800 text-white flex justify-between items-center">
+                <h3 id="plan-modal-title" class="font-bold text-sm">Tambah Action Plan Baru</h3>
+                <button onclick="closePlanModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form id="plan-form" onsubmit="savePlanModal(event)" class="p-6 space-y-4 overflow-y-auto flex-1 text-xs">
+                <input type="hidden" id="modal-plan-id">
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Periode Tahun</label>
+                        <select id="modal-plan-year" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Periode Bulan</label>
+                        <select id="modal-plan-month" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500">
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Satuan</label>
+                        <input type="text" id="modal-plan-satuan" required placeholder="Contoh: Unit, Ls, M2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Nama Action Plan Pekerjaan</label>
+                    <input type="text" id="modal-plan-name" required placeholder="Sebutkan Rencana Action Plan..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Divisi / Unit Kerja</label>
+                        <select id="modal-plan-divisi" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500">
+                            <!-- Master Divisi -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">PIC / Penanggung Jawab</label>
+                        <select id="modal-plan-pic" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500">
+                            <!-- Master PIC -->
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Uraian Pekerjaan & Keterangan</label>
+                    <textarea id="modal-plan-uraian" rows="2" placeholder="Uraian detail tindak lanjut..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500"></textarea>
+                </div>
+
+                <!-- Dynamic Weekly Matrix Input Fields inside Modal -->
+                <div class="border-t border-slate-200 pt-4 space-y-3">
+                    <h4 class="font-bold text-slate-800 text-xs flex items-center justify-between">
+                        <span>Distribusi Rencana Mingguan (Vol, Biaya, Bobot %)</span>
+                        <span id="modal-total-weight-badge" class="text-xs px-2 py-0.5 rounded bg-slate-100 font-semibold text-primary-600">Total Bobot: 0%</span>
+                    </h4>
+                    <div id="modal-weekly-inputs-container" class="space-y-3 max-h-48 overflow-y-auto pr-1">
+                        <!-- Populated dynamically based on period's active weeks -->
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-200 flex justify-end gap-2">
+                    <button type="button" onclick="closePlanModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-lg shadow-sm">Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APPLICATION LOGIC -->
+    <script>
+        // ==========================================
+        // 1. DATA STRUCTURES & APPLICATION STATE
+        // ==========================================
+        const MONTH_NAMES = [
+            'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+        ];
+
+        let appState = {
+            activePanel: 'dashboard',
+            globalYear: 2026,
+            globalMonth: 2, // Default Maret 2026
+            resumeChartMode: 'cost', // 'cost', 'weight', 'deviation'
+            
+            // Dynamic Master Configuration
+            divisions: ['Infrastructure 2', 'Divisi Konstruksi 1', 'Divisi EPCC', 'QA/QC Internal'],
+            pics: ['Nyoman Rowin Sinaya', 'Budi Santoso', 'Siti Rahmawati', 'Ahmad Hidayat'],
+            
+            // Dynamic Weeks Configuration per Period Key (e.g. "2026-2": ['Minggu 1', 'Minggu 2', ...])
+            periodWeeks: {
+                "2026-0": ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4"],
+                "2026-1": ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4"],
+                "2026-2": ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4", "Minggu 5"]
+            },
+
+            // Action Plan Items Data Repository
+            plans: []
+        };
+
+        // Charts instances
+        let chartWeeklyProgress = null;
+        let chartStatusPie = null;
+        let chartMonthlyTrend = null;
+        let chartCostComparison = null;
+        let chartResumeWeekly = null;
+
+        // ==========================================
+        // 2. INITIALIZATION & LOCALSTORAGE MANAGEMENT
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            loadStateFromStorage();
+            populateGlobalFilters();
+            renderMasterLists();
+            switchPanel('dashboard');
+        });
+
+        function loadStateFromStorage() {
+            const saved = localStorage.getItem('action_plan_app_state_v4');
+            if (saved) {
+                try {
+                    appState = JSON.parse(saved);
+                } catch(e) {
+                    console.error("Failed loading saved state", e);
+                    loadDefaultSampleData();
+                }
+            } else {
+                loadDefaultSampleData();
+            }
+        }
+
+        function saveStateToStorage() {
+            localStorage.setItem('action_plan_app_state_v4', JSON.stringify(appState));
+        }
+
+        function loadDefaultSampleData() {
+            appState.plans = [
+                {
+                    id: "plan-101",
+                    year: 2026,
+                    month: 2, // Maret
+                    name: "Pekerjaan Persiapan Site & Mobilisasi",
+                    satuan: "Ls",
+                    divisi: "Infrastructure 2",
+                    pic: "Nyoman Rowin Sinaya",
+                    uraian: "Mobilisasi alat berat dan pembersihan lahan.",
+                    weeksPlan: {
+                        "W1": { vol: 1, cost: 50000000, weight: 10 },
+                        "W2": { vol: 1, cost: 50000000, weight: 10 },
+                        "W3": { vol: 1, cost: 25000000, weight: 5 },
+                        "W4": { vol: 0, cost: 0, weight: 0 },
+                        "W5": { vol: 0, cost: 0, weight: 0 }
+                    },
+                    weeksActual: {
+                        "W1": { vol: 1, cost: 50000000, weight: 10 },
+                        "W2": { vol: 1, cost: 45000000, weight: 9 },
+                        "W3": { vol: 1, cost: 25000000, weight: 5 },
+                        "W4": { vol: 0, cost: 0, weight: 0 },
+                        "W5": { vol: 0, cost: 0, weight: 0 }
+                    }
+                },
+                {
+                    id: "plan-102",
+                    year: 2026,
+                    month: 2, // Maret
+                    name: "Pengadaan Material Utama Beton Readymix",
+                    satuan: "M3",
+                    divisi: "Infrastructure 2",
+                    pic: "Budi Santoso",
+                    uraian: "Supply 500 M3 beton mutu K-350.",
+                    weeksPlan: {
+                        "W1": { vol: 100, cost: 120000000, weight: 15 },
+                        "W2": { vol: 150, cost: 180000000, weight: 20 },
+                        "W3": { vol: 150, cost: 180000000, weight: 20 },
+                        "W4": { vol: 100, cost: 120000000, weight: 20 },
+                        "W5": { vol: 0, cost: 0, weight: 0 }
+                    },
+                    weeksActual: {
+                        "W1": { vol: 100, cost: 120000000, weight: 15 },
+                        "W2": { vol: 160, cost: 190000000, weight: 22 },
+                        "W3": { vol: 120, cost: 140000000, weight: 16 },
+                        "W4": { vol: 80, cost: 95000000, weight: 15 },
+                        "W5": { vol: 0, cost: 0, weight: 0 }
+                    }
+                }
+            ];
+            saveStateToStorage();
+        }
+
+        // ==========================================
+        // 3. GLOBAL PERIOD FILTER MANAGEMENT
+        // ==========================================
+        function populateGlobalFilters() {
+            const yearSelect = document.getElementById('global-year-select');
+            const monthSelect = document.getElementById('global-month-select');
+
+            // Years Options (2025 - 2028)
+            yearSelect.innerHTML = '';
+            for (let y = 2025; y <= 2028; y++) {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = `Tahun ${y}`;
+                if (y === appState.globalYear) opt.selected = true;
+                yearSelect.appendChild(opt);
+            }
+
+            // Months Options
+            monthSelect.innerHTML = '<option value="ALL">Semua Bulan (Tahunan)</option>';
+            MONTH_NAMES.forEach((m, idx) => {
+                const opt = document.createElement('option');
+                opt.value = idx;
+                opt.textContent = m;
+                if (appState.globalMonth !== 'ALL' && parseInt(appState.globalMonth) === idx) {
+                    opt.selected = true;
+                }
+                monthSelect.appendChild(opt);
+            });
+        }
+
+        function onGlobalPeriodChange() {
+            appState.globalYear = parseInt(document.getElementById('global-year-select').value);
+            const mVal = document.getElementById('global-month-select').value;
+            appState.globalMonth = (mVal === 'ALL') ? 'ALL' : parseInt(mVal);
+
+            saveStateToStorage();
+            refreshActivePanel();
+        }
+
+        function resetGlobalPeriod() {
+            appState.globalYear = 2026;
+            appState.globalMonth = 2; // Maret default
+            populateGlobalFilters();
+            onGlobalPeriodChange();
+        }
+
+        function getActiveWeeksList(year, month) {
+            if (month === 'ALL') {
+                return ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4"];
+            }
+            const key = `${year}-${month}`;
+            if (!appState.periodWeeks[key]) {
+                appState.periodWeeks[key] = ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4"];
+                saveStateToStorage();
+            }
+            return appState.periodWeeks[key];
+        }
+
+        function addWeekToCurrentPeriod() {
+            if (appState.globalMonth === 'ALL') {
+                alert('Silakan pilih bulan spesifik terlebih dahulu untuk menambahkan minggu baru.');
+                return;
+            }
+            const activeWeeks = getActiveWeeksList(appState.globalYear, appState.globalMonth);
+            const newWeekName = `Minggu ${activeWeeks.length + 1}`;
+            activeWeeks.push(newWeekName);
+            saveStateToStorage();
+
+            alert(`Berhasil menambahkan ${newWeekName} pada periode ${MONTH_NAMES[appState.globalMonth]} ${appState.globalYear}`);
+            refreshActivePanel();
+        }
+
+        // ==========================================
+        // 4. PANEL SWITCHING & NAVIGATION
+        // ==========================================
+        function switchPanel(panelId) {
+            appState.activePanel = panelId;
+
+            // Update Sidebar Nav CSS
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('bg-primary-600', 'text-white');
+                el.classList.add('hover:bg-slate-800', 'hover:text-white');
+            });
+            const activeNav = document.getElementById(`nav-${panelId}`);
+            if (activeNav) {
+                activeNav.classList.add('bg-primary-600', 'text-white');
+                activeNav.classList.remove('hover:bg-slate-800');
+            }
+
+            // Hide/Show Panels
+            document.querySelectorAll('.panel-content').forEach(p => p.classList.add('hidden'));
+            const targetPanel = document.getElementById(`panel-${panelId}`);
+            if (targetPanel) targetPanel.classList.remove('hidden');
+
+            // Panel Title Text
+            const titleMap = {
+                'dashboard': 'Dashboard Monitoring Action Plan',
+                'rencana': 'Rencana Action Plan (Matrix Horizontal)',
+                'realisasi': 'Realisasi Action Plan Pekerjaan',
+                'resume': 'Resume & Laporan Evaluasi Bulanan',
+                'master': 'Pengelolaan Data Master',
+                'pengaturan': 'Pengaturan & System Backup'
+            };
+            document.getElementById('current-panel-title').textContent = titleMap[panelId] || 'Monitoring System';
+
+            refreshActivePanel();
+        }
+
+        function refreshActivePanel() {
+            const periodText = (appState.globalMonth === 'ALL') 
+                ? `Tahun ${appState.globalYear} (Semua Bulan)` 
+                : `${MONTH_NAMES[appState.globalMonth]} ${appState.globalYear}`;
+
+            document.getElementById('lbl-rencana-period').textContent = periodText;
+            document.getElementById('lbl-realisasi-period').textContent = periodText;
+            document.getElementById('lbl-resume-active-period').textContent = periodText;
+
+            if (appState.activePanel === 'dashboard') renderDashboard();
+            else if (appState.activePanel === 'rencana') renderRencanaTable();
+            else if (appState.activePanel === 'realisasi') renderRealisasiTable();
+            else if (appState.activePanel === 'resume') renderResumePanel();
+            else if (appState.activePanel === 'master') renderMasterLists();
+        }
+
+        // ==========================================
+        // 5. HELPER CALCULATIONS
+        // ==========================================
+        function filterPlansByGlobalPeriod() {
+            return appState.plans.filter(p => {
+                const matchYear = p.year === appState.globalYear;
+                const matchMonth = (appState.globalMonth === 'ALL') || (p.month === appState.globalMonth);
+                return matchYear && matchMonth;
+            });
+        }
+
+        function calculatePlanTotals(plan, weeksList) {
+            let totVolPlan = 0, totCostPlan = 0, totWeightPlan = 0;
+            let totVolAct = 0, totCostAct = 0, totWeightAct = 0;
+
+            weeksList.forEach((_, idx) => {
+                const wKey = `W${idx + 1}`;
+                const wp = (plan.weeksPlan && plan.weeksPlan[wKey]) || { vol: 0, cost: 0, weight: 0 };
+                const wa = (plan.weeksActual && plan.weeksActual[wKey]) || { vol: 0, cost: 0, weight: 0 };
+
+                totVolPlan += parseFloat(wp.vol || 0);
+                totCostPlan += parseFloat(wp.cost || 0);
+                totWeightPlan += parseFloat(wp.weight || 0);
+
+                totVolAct += parseFloat(wa.vol || 0);
+                totCostAct += parseFloat(wa.cost || 0);
+                totWeightAct += parseFloat(wa.weight || 0);
+            });
+
+            return { totVolPlan, totCostPlan, totWeightPlan, totVolAct, totCostAct, totWeightAct };
+        }
+
+        function formatRp(num) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num || 0);
+        }
+
+        // ==========================================
+        // 6. DASHBOARD MONITORING & CHARTS
+        // ==========================================
+        function renderDashboard() {
+            const activePlans = filterPlansByGlobalPeriod();
+            const weeksList = getActiveWeeksList(appState.globalYear, appState.globalMonth);
+
+            let totalPlanCost = 0, totalActualCost = 0;
+            let totalPlanWeight = 0, totalActualWeight = 0;
+
+            let countSelesai = 0, countBerjalan = 0, countBelum = 0, countTerlambat = 0;
+
+            activePlans.forEach(p => {
+                const totals = calculatePlanTotals(p, weeksList);
+                totalPlanCost += totals.totCostPlan;
+                totalActualCost += totals.totCostAct;
+                totalPlanWeight += totals.totWeightPlan;
+                totalActualWeight += totals.totWeightAct;
+
+                // Status Evaluation
+                if (totals.totWeightAct >= totals.totWeightPlan && totals.totWeightPlan > 0) {
+                    countSelesai++;
+                } else if (totals.totWeightAct > 0) {
+                    countBerjalan++;
+                } else if (totals.totWeightAct === 0) {
+                    countBelum++;
+                }
+            });
+
+            const deviationWeight = totalActualWeight - totalPlanWeight;
+
+            // Render KPI Cards
+            document.getElementById('kpi-total-plans').textContent = `${activePlans.length} Pekerjaan`;
+            document.getElementById('kpi-total-weight').textContent = `${totalPlanWeight.toFixed(2)}% Target Bobot`;
+
+            document.getElementById('kpi-realization-pct').textContent = `${totalActualWeight.toFixed(2)}%`;
+            document.getElementById('kpi-realization-deviation').textContent = `Deviasi: ${deviationWeight >= 0 ? '+' : ''}${deviationWeight.toFixed(2)}%`;
+            document.getElementById('kpi-realization-deviation').className = `text-xs font-semibold ${deviationWeight >= 0 ? 'text-emerald-600' : 'text-rose-600'}`;
+
+            document.getElementById('kpi-plan-cost').textContent = formatRp(totalPlanCost);
+            document.getElementById('kpi-actual-cost').textContent = formatRp(totalActualCost);
+
+            const costDev = totalActualCost - totalPlanCost;
+            document.getElementById('kpi-cost-dev').textContent = `Selisih: ${formatRp(costDev)}`;
+
+            // Status Badges
+            document.getElementById('status-cnt-selesai').textContent = countSelesai;
+            document.getElementById('status-cnt-berjalan').textContent = countBerjalan;
+            document.getElementById('status-cnt-belum').textContent = countBelum;
+            document.getElementById('status-cnt-terlambat').textContent = countTerlambat;
+
+            // Render Charts
+            renderCharts(activePlans, weeksList);
+        }
+
+        function renderCharts(activePlans, weeksList) {
+            const weekLabels = weeksList;
+            const weekPlanWeights = weeksList.map((_, idx) => {
+                const wKey = `W${idx + 1}`;
+                return activePlans.reduce((sum, p) => sum + parseFloat((p.weeksPlan && p.weeksPlan[wKey] && p.weeksPlan[wKey].weight) || 0), 0);
+            });
+            const weekActualWeights = weeksList.map((_, idx) => {
+                const wKey = `W${idx + 1}`;
+                return activePlans.reduce((sum, p) => sum + parseFloat((p.weeksActual && p.weeksActual[wKey] && p.weeksActual[wKey].weight) || 0), 0);
+            });
+
+            if (chartWeeklyProgress) chartWeeklyProgress.destroy();
+            const ctx1 = document.getElementById('chart-weekly-progress').getContext('2d');
+            chartWeeklyProgress = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: weekLabels,
+                    datasets: [
+                        { label: 'Target Rencana (%)', data: weekPlanWeights, backgroundColor: '#3b82f6' },
+                        { label: 'Realisasi Aktual (%)', data: weekActualWeights, backgroundColor: '#10b981' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Chart 2: Status Pie
+            const statusData = [
+                parseInt(document.getElementById('status-cnt-selesai').textContent),
+                parseInt(document.getElementById('status-cnt-berjalan').textContent),
+                parseInt(document.getElementById('status-cnt-belum').textContent),
+                parseInt(document.getElementById('status-cnt-terlambat').textContent)
+            ];
+
+            if (chartStatusPie) chartStatusPie.destroy();
+            const ctx2 = document.getElementById('chart-status-pie').getContext('2d');
+            chartStatusPie = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Selesai', 'Sedang Berjalan', 'Belum Dimulai', 'Terlambat'],
+                    datasets: [{
+                        data: statusData,
+                        backgroundColor: ['#10b981', '#f59e0b', '#94a3b8', '#f43f5e']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Chart 3: Monthly Trend
+            const monthTrendLabels = MONTH_NAMES;
+            const monthTrendData = MONTH_NAMES.map((_, mIdx) => {
+                const mPlans = appState.plans.filter(p => p.year === appState.globalYear && p.month === mIdx);
+                return mPlans.reduce((sum, p) => {
+                    const totals = calculatePlanTotals(p, getActiveWeeksList(appState.globalYear, mIdx));
+                    return sum + totals.totWeightAct;
+                }, 0);
+            });
+
+            if (chartMonthlyTrend) chartMonthlyTrend.destroy();
+            const ctx3 = document.getElementById('chart-monthly-trend').getContext('2d');
+            chartMonthlyTrend = new Chart(ctx3, {
+                type: 'line',
+                data: {
+                    labels: monthTrendLabels,
+                    datasets: [{
+                        label: 'Capaian Realisasi (%)',
+                        data: monthTrendData,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Chart 4: Cost Plan vs Actual
+            const weekPlanCosts = weeksList.map((_, idx) => {
+                const wKey = `W${idx + 1}`;
+                return activePlans.reduce((sum, p) => sum + parseFloat((p.weeksPlan && p.weeksPlan[wKey] && p.weeksPlan[wKey].cost) || 0), 0);
+            });
+            const weekActualCosts = weeksList.map((_, idx) => {
+                const wKey = `W${idx + 1}`;
+                return activePlans.reduce((sum, p) => sum + parseFloat((p.weeksActual && p.weeksActual[wKey] && p.weeksActual[wKey].cost) || 0), 0);
+            });
+
+            if (chartCostComparison) chartCostComparison.destroy();
+            const ctx4 = document.getElementById('chart-cost-comparison').getContext('2d');
+            chartCostComparison = new Chart(ctx4, {
+                type: 'bar',
+                data: {
+                    labels: weekLabels,
+                    datasets: [
+                        { label: 'Rencana Biaya (Rp)', data: weekPlanCosts, backgroundColor: '#60a5fa' },
+                        { label: 'Realisasi Biaya (Rp)', data: weekActualCosts, backgroundColor: '#f59e0b' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        // ==========================================
+        // 7. PANEL RENCANA ACTION PLAN (MATRIX HORIZONTAL)
+        // ==========================================
+        function renderRencanaTable() {
+            const activePlans = filterPlansByGlobalPeriod();
+            const searchKeyword = (document.getElementById('search-rencana').value || '').toLowerCase();
+            const filteredPlans = activePlans.filter(p => p.name.toLowerCase().includes(searchKeyword) || p.satuan.toLowerCase().includes(searchKeyword));
+            const weeksList = getActiveWeeksList(appState.globalYear, appState.globalMonth);
+
+            const hRow1 = document.getElementById('rencana-header-row-1');
+            const hRow2 = document.getElementById('rencana-header-row-2');
+            const tbody = document.getElementById('rencana-table-body');
+            const tfoot = document.getElementById('rencana-table-foot');
+
+            // Header Row 1
+            let h1Html = `
+                <th rowspan="2" class="p-3 border-r border-slate-700 sticky-col-1 w-12 text-center">No</th>
+                <th rowspan="2" class="p-3 border-r border-slate-700 sticky-col-2 min-w-[200px]">Nama Action Plan</th>
+                <th rowspan="2" class="p-3 border-r border-slate-700 sticky-col-3 w-20 text-center">Satuan</th>
+                <th colspan="3" class="p-2 border-r border-slate-700 text-center bg-slate-900 text-primary-300">TOTAL RENCANA BULANAN</th>
+            `;
+            weeksList.forEach(w => {
+                h1Html += `<th colspan="3" class="p-2 border-r border-slate-700 text-center bg-slate-800">${w}</th>`;
+            });
+            h1Html += `<th rowspan="2" class="p-3 text-center no-print w-24">Aksi</th>`;
+            hRow1.innerHTML = h1Html;
+
+            // Header Row 2
+            let h2Html = `
+                <th class="p-2 border-r border-slate-600 text-center bg-slate-800 text-primary-300">Vol</th>
+                <th class="p-2 border-r border-slate-600 text-center bg-slate-800 text-primary-300">Jumlah (Rp)</th>
+                <th class="p-2 border-r border-slate-600 text-center bg-slate-800 text-primary-300">Bobot (%)</th>
+            `;
+            weeksList.forEach(() => {
+                h2Html += `
+                    <th class="p-2 border-r border-slate-600 text-center">Vol</th>
+                    <th class="p-2 border-r border-slate-600 text-center">Jumlah (Rp)</th>
+                    <th class="p-2 border-r border-slate-600 text-center">Bobot (%)</th>
+                `;
+            });
+            hRow2.innerHTML = h2Html;
+
+            // Body Data Rows
+            tbody.innerHTML = '';
+            let grandVol = 0, grandCost = 0, grandWeight = 0;
+            let weekTotals = weeksList.map(() => ({ vol: 0, cost: 0, weight: 0 }));
+
+            filteredPlans.forEach((plan, idx) => {
+                const totals = calculatePlanTotals(plan, weeksList);
+                grandVol += totals.totVolPlan;
+                grandCost += totals.totCostPlan;
+                grandWeight += totals.totWeightPlan;
+
+                let rowHtml = `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-200">
+                        <td class="p-3 border-r border-slate-200 sticky-col-1 text-center font-semibold bg-white">${idx + 1}</td>
+                        <td class="p-3 border-r border-slate-200 sticky-col-2 font-bold text-slate-800 bg-white">${plan.name}</td>
+                        <td class="p-3 border-r border-slate-200 sticky-col-3 text-center bg-white">${plan.satuan}</td>
+                        
+                        <!-- Totals Columns -->
+                        <td class="p-2 border-r border-slate-200 text-center font-bold bg-primary-50/50 text-slate-800">${totals.totVolPlan}</td>
+                        <td class="p-2 border-r border-slate-200 text-right font-bold bg-primary-50/50 text-slate-800">${formatRp(totals.totCostPlan)}</td>
+                        <td class="p-2 border-r border-slate-200 text-center font-bold bg-primary-50/50 text-primary-700">${totals.totWeightPlan.toFixed(2)}%</td>
+                `;
+
+                // Weekly Matrix Cells
+                weeksList.forEach((_, wIdx) => {
+                    const wKey = `W${wIdx + 1}`;
+                    const wp = (plan.weeksPlan && plan.weeksPlan[wKey]) || { vol: 0, cost: 0, weight: 0 };
+
+                    weekTotals[wIdx].vol += parseFloat(wp.vol || 0);
+                    weekTotals[wIdx].cost += parseFloat(wp.cost || 0);
+                    weekTotals[wIdx].weight += parseFloat(wp.weight || 0);
+
+                    rowHtml += `
+                        <td class="p-1 border-r border-slate-200 text-center">
+                            <input type="number" step="any" value="${wp.vol}" onchange="updateInlinePlan('${plan.id}', '${wKey}', 'vol', this.value)" class="w-14 text-center px-1 py-0.5 border border-slate-200 rounded focus:ring-1 focus:ring-primary-500">
+                        </td>
+                        <td class="p-1 border-r border-slate-200 text-right">
+                            <input type="number" step="any" value="${wp.cost}" onchange="updateInlinePlan('${plan.id}', '${wKey}', 'cost', this.value)" class="w-24 text-right px-1 py-0.5 border border-slate-200 rounded focus:ring-1 focus:ring-primary-500">
+                        </td>
+                        <td class="p-1 border-r border-slate-200 text-center">
+                            <input type="number" step="any" value="${wp.weight}" onchange="updateInlinePlan('${plan.id}', '${wKey}', 'weight', this.value)" class="w-16 text-center px-1 py-0.5 border border-slate-200 rounded focus:ring-1 focus:ring-primary-500 font-semibold">
+                        </td>
+                    `;
+                });
+
+                rowHtml += `
+                    <td class="p-2 text-center no-print">
+                        <div class="flex items-center justify-center gap-1">
+                            <button onclick="openPlanModal('${plan.id}')" class="p-1 text-blue-600 hover:text-blue-800" title="Edit"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deletePlan('${plan.id}')" class="p-1 text-rose-600 hover:text-rose-800" title="Hapus"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>`;
+
+                tbody.innerHTML += rowHtml;
+            });
+
+            // Footer Summary Row
+            let footHtml = `
+                <tr>
+                    <td colspan="3" class="p-3 border-r border-slate-300 text-center font-bold uppercase sticky-col-1 bg-slate-100">TOTAL KESELURUHAN</td>
+                    <td class="p-2 border-r border-slate-300 text-center font-bold text-slate-800">${grandVol}</td>
+                    <td class="p-2 border-r border-slate-300 text-right font-bold text-slate-800">${formatRp(grandCost)}</td>
+                    <td class="p-2 border-r border-slate-300 text-center font-bold text-primary-700">${grandWeight.toFixed(2)}%</td>
+            `;
+
+            weekTotals.forEach(wt => {
+                footHtml += `
+                    <td class="p-2 border-r border-slate-300 text-center font-bold">${wt.vol}</td>
+                    <td class="p-2 border-r border-slate-300 text-right font-bold">${formatRp(wt.cost)}</td>
+                    <td class="p-2 border-r border-slate-300 text-center font-bold text-primary-700">${wt.weight.toFixed(2)}%</td>
+                `;
+            });
+
+            footHtml += `<td class="p-2 no-print"></td></tr>`;
+            tfoot.innerHTML = footHtml;
+        }
+
+        function updateInlinePlan(planId, weekKey, field, value) {
+            const plan = appState.plans.find(p => p.id === planId);
+            if (!plan) return;
+
+            if (!plan.weeksPlan) plan.weeksPlan = {};
+            if (!plan.weeksPlan[weekKey]) plan.weeksPlan[weekKey] = { vol: 0, cost: 0, weight: 0 };
+
+            plan.weeksPlan[weekKey][field] = parseFloat(value || 0);
+            saveStateToStorage();
+            refreshActivePanel();
+        }
+
+        // ==========================================
+        // 8. PANEL REALISASI ACTION PLAN
+        // ==========================================
+        function renderRealisasiTable() {
+            const activePlans = filterPlansByGlobalPeriod();
+            const searchKeyword = (document.getElementById('search-realisasi').value || '').toLowerCase();
+            const filteredPlans = activePlans.filter(p => p.name.toLowerCase().includes(searchKeyword));
+            const weeksList = getActiveWeeksList(appState.globalYear, appState.globalMonth);
+
+            const hRow1 = document.getElementById('realisasi-header-row-1');
+            const hRow2 = document.getElementById('realisasi-header-row-2');
+            const tbody = document.getElementById('realisasi-table-body');
+            const tfoot = document.getElementById('realisasi-table-foot');
+
+            // Header Row 1
+            let h1Html = `
+                <th rowspan="2" class="p-3 border-r border-slate-700 sticky-col-1 w-12 text-center">No</th>
+                <th rowspan="2" class="p-3 border-r border-slate-700 sticky-col-2 min-w-[200px]">Nama Action Plan</th>
+                <th rowspan="2" class="p-3 border-r border-slate-700 sticky-col-3 w-20 text-center">Satuan</th>
+                <th colspan="3" class="p-2 border-r border-slate-700 text-center bg-slate-900 text-emerald-300">TOTAL REALISASI BULANAN</th>
+            `;
+            weeksList.forEach(w => {
+                h1Html += `<th colspan="3" class="p-2 border-r border-slate-700 text-center bg-slate-800">REALISASI ${w.toUpperCase()}</th>`;
+            });
+            h1Html += `<th rowspan="2" class="p-3 text-center w-24">Deviasi Bobot</th>`;
+            hRow1.innerHTML = h1Html;
+
+            // Header Row 2
+            let h2Html = `
+                <th class="p-2 border-r border-slate-600 text-center bg-slate-800 text-emerald-300">Vol</th>
+                <th class="p-2 border-r border-slate-600 text-center bg-slate-800 text-emerald-300">Jumlah (Rp)</th>
+                <th class="p-2 border-r border-slate-600 text-center bg-slate-800 text-emerald-300">Bobot (%)</th>
+            `;
+            weeksList.forEach(() => {
+                h2Html += `
+                    <th class="p-2 border-r border-slate-600 text-center">Vol</th>
+                    <th class="p-2 border-r border-slate-600 text-center">Jumlah (Rp)</th>
+                    <th class="p-2 border-r border-slate-600 text-center">Bobot (%)</th>
+                `;
+            });
+            hRow2.innerHTML = h2Html;
+
+            // Body Data Rows
+            tbody.innerHTML = '';
+            let grandVolAct = 0, grandCostAct = 0, grandWeightAct = 0;
+            let weekTotals = weeksList.map(() => ({ vol: 0, cost: 0, weight: 0 }));
+
+            filteredPlans.forEach((plan, idx) => {
+                const totals = calculatePlanTotals(plan, weeksList);
+                grandVolAct += totals.totVolAct;
+                grandCostAct += totals.totCostAct;
+                grandWeightAct += totals.totWeightAct;
+
+                const devWeight = totals.totWeightAct - totals.totWeightPlan;
+
+                let rowHtml = `
+                    <tr class="hover:bg-slate-50 transition border-b border-slate-200">
+                        <td class="p-3 border-r border-slate-200 sticky-col-1 text-center font-semibold bg-white">${idx + 1}</td>
+                        <td class="p-3 border-r border-slate-200 sticky-col-2 font-bold text-slate-800 bg-white">${plan.name}</td>
+                        <td class="p-3 border-r border-slate-200 sticky-col-3 text-center bg-white">${plan.satuan}</td>
+                        
+                        <!-- Totals Columns -->
+                        <td class="p-2 border-r border-slate-200 text-center font-bold bg-emerald-50/50 text-slate-800">${totals.totVolAct}</td>
+                        <td class="p-2 border-r border-slate-200 text-right font-bold bg-emerald-50/50 text-slate-800">${formatRp(totals.totCostAct)}</td>
+                        <td class="p-2 border-r border-slate-200 text-center font-bold bg-emerald-50/50 text-emerald-700">${totals.totWeightAct.toFixed(2)}%</td>
+                `;
+
+                weeksList.forEach((_, wIdx) => {
+                    const wKey = `W${wIdx + 1}`;
+                    const wa = (plan.weeksActual && plan.weeksActual[wKey]) || { vol: 0, cost: 0, weight: 0 };
+
+                    weekTotals[wIdx].vol += parseFloat(wa.vol || 0);
+                    weekTotals[wIdx].cost += parseFloat(wa.cost || 0);
+                    weekTotals[wIdx].weight += parseFloat(wa.weight || 0);
+
+                    rowHtml += `
+                        <td class="p-1 border-r border-slate-200 text-center">
+                            <input type="number" step="any" value="${wa.vol}" onchange="updateInlineActual('${plan.id}', '${wKey}', 'vol', this.value)" class="w-14 text-center px-1 py-0.5 border border-slate-200 rounded focus:ring-1 focus:ring-emerald-500">
+                        </td>
+                        <td class="p-1 border-r border-slate-200 text-right">
+                            <input type="number" step="any" value="${wa.cost}" onchange="updateInlineActual('${plan.id}', '${wKey}', 'cost', this.value)" class="w-24 text-right px-1 py-0.5 border border-slate-200 rounded focus:ring-1 focus:ring-emerald-500">
+                        </td>
+                        <td class="p-1 border-r border-slate-200 text-center">
+                            <input type="number" step="any" value="${wa.weight}" onchange="updateInlineActual('${plan.id}', '${wKey}', 'weight', this.value)" class="w-16 text-center px-1 py-0.5 border border-slate-200 rounded focus:ring-1 focus:ring-emerald-500 font-semibold">
+                        </td>
+                    `;
+                });
+
+                rowHtml += `
+                    <td class="p-2 text-center font-bold ${devWeight >= 0 ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50'}">
+                        ${devWeight >= 0 ? '+' : ''}${devWeight.toFixed(2)}%
+                    </td>
+                </tr>`;
+
+                tbody.innerHTML += rowHtml;
+            });
+
+            // Footer Summary Row
+            let footHtml = `
+                <tr>
+                    <td colspan="3" class="p-3 border-r border-slate-300 text-center font-bold uppercase sticky-col-1 bg-slate-100">TOTAL REALISASI</td>
+                    <td class="p-2 border-r border-slate-300 text-center font-bold text-slate-800">${grandVolAct}</td>
+                    <td class="p-2 border-r border-slate-300 text-right font-bold text-slate-800">${formatRp(grandCostAct)}</td>
+                    <td class="p-2 border-r border-slate-300 text-center font-bold text-emerald-700">${grandWeightAct.toFixed(2)}%</td>
+            `;
+
+            weekTotals.forEach(wt => {
+                footHtml += `
+                    <td class="p-2 border-r border-slate-300 text-center font-bold">${wt.vol}</td>
+                    <td class="p-2 border-r border-slate-300 text-right font-bold">${formatRp(wt.cost)}</td>
+                    <td class="p-2 border-r border-slate-300 text-center font-bold text-emerald-700">${wt.weight.toFixed(2)}%</td>
+                `;
+            });
+
+            footHtml += `<td class="p-2 text-center font-bold"></td></tr>`;
+            tfoot.innerHTML = footHtml;
+        }
+
+        function updateInlineActual(planId, weekKey, field, value) {
+            const plan = appState.plans.find(p => p.id === planId);
+            if (!plan) return;
+
+            if (!plan.weeksActual) plan.weeksActual = {};
+            if (!plan.weeksActual[weekKey]) plan.weeksActual[weekKey] = { vol: 0, cost: 0, weight: 0 };
+
+            plan.weeksActual[weekKey][field] = parseFloat(value || 0);
+            saveStateToStorage();
+            refreshActivePanel();
+        }
+
+        // ==========================================
+        // 9. PANEL RESUME BULANAN & EVALUATION
+        // ==========================================
+        function renderResumePanel() {
+            const activePlans = filterPlansByGlobalPeriod();
+            const weeksList = getActiveWeeksList(appState.globalYear, appState.globalMonth);
+
+            const periodText = (appState.globalMonth === 'ALL') 
+                ? `TAHUN ${appState.globalYear}` 
+                : `${MONTH_NAMES[appState.globalMonth].toUpperCase()} ${appState.globalYear}`;
+
+            document.getElementById('resume-doc-period').textContent = `PERIODE MONITORING: ${periodText}`;
+            document.getElementById('resume-doc-date').textContent = new Date().toLocaleDateString('id-ID');
+
+            // 1. Calculate Grand Totals for KPI Cards
+            let totCostPlan = 0, totCostAct = 0;
+            let totWeightPlan = 0, totWeightAct = 0;
+
+            activePlans.forEach(p => {
+                const totals = calculatePlanTotals(p, weeksList);
+                totCostPlan += totals.totCostPlan;
+                totCostAct += totals.totCostAct;
+                totWeightPlan += totals.totWeightPlan;
+                totWeightAct += totals.totWeightAct;
+            });
+
+            const devCost = totCostAct - totCostPlan;
+            const devWeight = totWeightAct - totWeightPlan;
+
+            document.getElementById('res-kpi-cost-plan').textContent = formatRp(totCostPlan);
+            document.getElementById('res-kpi-cost-act').textContent = formatRp(totCostAct);
+            document.getElementById('res-kpi-cost-dev').textContent = `${devCost >= 0 ? '+' : ''}${formatRp(devCost)}`;
+            document.getElementById('res-kpi-cost-dev').className = `text-sm font-bold mt-1 ${devCost <= 0 ? 'text-emerald-600' : 'text-rose-600'}`;
+
+            document.getElementById('res-kpi-weight-plan').textContent = `${totWeightPlan.toFixed(2)}%`;
+            document.getElementById('res-kpi-weight-act').textContent = `${totWeightAct.toFixed(2)}%`;
+            document.getElementById('res-kpi-weight-dev').textContent = `${devWeight >= 0 ? '+' : ''}${devWeight.toFixed(2)}%`;
+            document.getElementById('res-kpi-weight-dev').className = `text-sm font-bold mt-1 ${devWeight >= 0 ? 'text-emerald-600' : 'text-rose-600'}`;
+
+            // 2. Render Rincian Item Pekerjaan Table
+            renderResumeItemsTable();
+
+            // 3. Render Weekly Comparison Table
+            renderResumeWeeklyTable();
+
+            // 4. Render Resume Chart
+            renderResumeChart();
+
+            // 5. Render Automatic Evaluation Draft
+            renderResumeEvaluationText(activePlans, weeksList, totCostPlan, totCostAct, devCost, totWeightPlan, totWeightAct, devWeight);
+        }
+
+        function renderResumeItemsTable() {
+            const activePlans = filterPlansByGlobalPeriod();
+            const weeksList = getActiveWeeksList(appState.globalYear, appState.globalMonth);
+            const searchKeyword = (document.getElementById('search-resume-items')?.value || '').toLowerCase();
+            const filteredPlans = activePlans.filter(p => p.name.toLowerCase().includes(searchKeyword));
+
+            const tbody = document.getElementById('resume-items-tbody');
+            const tfoot = document.getElementById('resume-items-tfoot');
+            tbody.innerHTML = '';
+
+            if (filteredPlans.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-400">Tidak ada data Action Plan pada periode ini.</td></tr>`;
+                tfoot.innerHTML = '';
+                return;
+            }
+
+            let grandVolPlan = 0, grandVolAct = 0;
+            let grandCostPlan = 0, grandCostAct = 0;
+            let grandWeightPlan = 0, grandWeightAct = 0;
+
+            filteredPlans.forEach((plan, idx) => {
+                const totals = calculatePlanTotals(plan, weeksList);
+                grandVolPlan += totals.totVolPlan;
+                grandVolAct += totals.totVolAct;
+                grandCostPlan += totals.totCostPlan;
+                grandCostAct += totals.totCostAct;
+                grandWeightPlan += totals.totWeightPlan;
+                grandWeightAct += totals.totWeightAct;
+
+                const devWeight = totals.totWeightAct - totals.totWeightPlan;
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 border-b border-slate-100">
+                        <td class="p-2.5 text-center font-semibold">${idx + 1}</td>
+                        <td class="p-2.5 font-bold text-slate-800">${plan.name}</td>
+                        <td class="p-2.5 text-center">${plan.satuan || '—'}</td>
+                        <td class="p-2.5 text-center">${totals.totVolPlan || 0}</td>
+                        <td class="p-2.5 text-center">${totals.totVolAct || 0}</td>
+                        <td class="p-2.5 text-right font-mono">${formatRp(totals.totCostPlan)}</td>
+                        <td class="p-2.5 text-right font-mono">${formatRp(totals.totCostAct)}</td>
+                        <td class="p-2.5 text-center font-semibold text-primary-600">${totals.totWeightPlan.toFixed(2)}%</td>
+                        <td class="p-2.5 text-center font-semibold text-emerald-600">${totals.totWeightAct.toFixed(2)}%</td>
+                        <td class="p-2.5 text-center font-bold ${devWeight >= 0 ? 'text-emerald-600' : 'text-rose-600'}">
+                            ${devWeight >= 0 ? '+' : ''}${devWeight.toFixed(2)}%
+                        </td>
+                    </tr>
+                `;
+            });
+
+            const grandDevWeight = grandWeightAct - grandWeightPlan;
+
+            tfoot.innerHTML = `
+                <tr>
+                    <td colspan="3" class="p-3 uppercase text-center font-bold">TOTAL BULANAN</td>
+                    <td class="p-2.5 text-center font-bold">${grandVolPlan}</td>
+                    <td class="p-2.5 text-center font-bold">${grandVolAct}</td>
+                    <td class="p-2.5 text-right font-mono font-bold">${formatRp(grandCostPlan)}</td>
+                    <td class="p-2.5 text-right font-mono font-bold">${formatRp(grandCostAct)}</td>
+                    <td class="p-2.5 text-center text-primary-700 font-bold">${grandWeightPlan.toFixed(2)}%</td>
+                    <td class="p-2.5 text-center text-emerald-700 font-bold">${grandWeightAct.toFixed(2)}%</td>
+                    <td class="p-2.5 text-center font-bold ${grandDevWeight >= 0 ? 'text-emerald-700' : 'text-rose-700'}">
+                        ${grandDevWeight >= 0 ? '+' : ''}${grandDevWeight.toFixed(2)}%
+                    </td>
+                </tr>
+            `;
+        }
+
+        function renderResumeWeeklyTable() {
+            const activePlans = filterPlansByGlobalPeriod();
+            const weeksList = getActiveWeeksList(appState.globalYear, appState.globalMonth);
+
+            const tbody = document.getElementById('resume-weekly-tbody');
+            const tfoot = document.getElementById('resume-weekly-tfoot');
+            tbody.innerHTML = '';
+
+            let grandCostPlan = 0, grandCostAct = 0;
+            let grandWeightPlan = 0, grandWeightAct = 0;
+
+            weeksList.forEach((w, idx) => {
+                const wKey = `W${idx + 1}`;
+                const wCostPlan = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksPlan && p.weeksPlan[wKey] && p.weeksPlan[wKey].cost) || 0), 0);
+                const wCostAct = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksActual && p.weeksActual[wKey] && p.weeksActual[wKey].cost) || 0), 0);
+                const wCostDev = wCostAct - wCostPlan;
+
+                const wWeightPlan = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksPlan && p.weeksPlan[wKey] && p.weeksPlan[wKey].weight) || 0), 0);
+                const wWeightAct = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksActual && p.weeksActual[wKey] && p.weeksActual[wKey].weight) || 0), 0);
+                const wWeightDev = wWeightAct - wWeightPlan;
+
+                grandCostPlan += wCostPlan;
+                grandCostAct += wCostAct;
+                grandWeightPlan += wWeightPlan;
+                grandWeightAct += wWeightAct;
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 border-b border-slate-100">
+                        <td class="p-2.5 font-bold text-slate-800">${w}</td>
+                        <td class="p-2.5 text-right font-mono">${formatRp(wCostPlan)}</td>
+                        <td class="p-2.5 text-right font-mono">${formatRp(wCostAct)}</td>
+                        <td class="p-2.5 text-right font-mono font-semibold ${wCostDev <= 0 ? 'text-slate-700' : 'text-amber-600'}">
+                            ${wCostDev >= 0 ? '+' : ''}${formatRp(wCostDev)}
+                        </td>
+                        <td class="p-2.5 text-center font-semibold text-primary-600">${wWeightPlan.toFixed(2)}%</td>
+                        <td class="p-2.5 text-center font-semibold text-emerald-600">${wWeightAct.toFixed(2)}%</td>
+                        <td class="p-2.5 text-center font-bold ${wWeightDev >= 0 ? 'text-emerald-600' : 'text-rose-600'}">
+                            ${wWeightDev >= 0 ? '+' : ''}${wWeightDev.toFixed(2)}%
+                        </td>
+                    </tr>
+                `;
+            });
+
+            const grandCostDev = grandCostAct - grandCostPlan;
+            const grandWeightDev = grandWeightAct - grandWeightPlan;
+
+            tfoot.innerHTML = `
+                <tr>
+                    <td class="p-3 uppercase font-bold">TOTAL BULANAN</td>
+                    <td class="p-2.5 text-right font-mono font-bold">${formatRp(grandCostPlan)}</td>
+                    <td class="p-2.5 text-right font-mono font-bold">${formatRp(grandCostAct)}</td>
+                    <td class="p-2.5 text-right font-mono font-bold ${grandCostDev <= 0 ? 'text-slate-800' : 'text-amber-700'}">
+                        ${grandCostDev >= 0 ? '+' : ''}${formatRp(grandCostDev)}
+                    </td>
+                    <td class="p-2.5 text-center text-primary-700 font-bold">${grandWeightPlan.toFixed(2)}%</td>
+                    <td class="p-2.5 text-center text-emerald-700 font-bold">${grandWeightAct.toFixed(2)}%</td>
+                    <td class="p-2.5 text-center font-bold ${grandWeightDev >= 0 ? 'text-emerald-700' : 'text-rose-700'}">
+                        ${grandWeightDev >= 0 ? '+' : ''}${grandWeightDev.toFixed(2)}%
+                    </td>
+                </tr>
+            `;
+        }
+
+        function setResumeChartMode(mode) {
+            appState.resumeChartMode = mode;
+            ['cost', 'weight', 'dev'].forEach(m => {
+                const btn = document.getElementById(`btn-chart-${m}`);
+                if (btn) {
+                    btn.className = `px-2.5 py-1 text-xs rounded font-medium ${m === (mode === 'deviation' ? 'dev' : mode) ? 'bg-primary-600 text-white' : 'bg-slate-200 hover:bg-slate-300 text-slate-700'}`;
+                }
+            });
+            renderResumeChart();
+        }
+
+        function renderResumeChart() {
+            const activePlans = filterPlansByGlobalPeriod();
+            const weeksList = getActiveWeeksList(appState.globalYear, appState.globalMonth);
+
+            const labels = weeksList;
+            let datasets = [];
+
+            if (appState.resumeChartMode === 'cost') {
+                const costsPlan = weeksList.map((_, idx) => activePlans.reduce((sum, p) => sum + parseFloat((p.weeksPlan && p.weeksPlan[`W${idx+1}`] && p.weeksPlan[`W${idx+1}`].cost) || 0), 0));
+                const costsAct = weeksList.map((_, idx) => activePlans.reduce((sum, p) => sum + parseFloat((p.weeksActual && p.weeksActual[`W${idx+1}`] && p.weeksActual[`W${idx+1}`].cost) || 0), 0));
+                
+                datasets = [
+                    { label: 'Biaya Rencana (Rp)', data: costsPlan, backgroundColor: '#3b82f6' },
+                    { label: 'Biaya Realisasi (Rp)', data: costsAct, backgroundColor: '#f59e0b' }
+                ];
+            } else if (appState.resumeChartMode === 'weight') {
+                const weightsPlan = weeksList.map((_, idx) => activePlans.reduce((sum, p) => sum + parseFloat((p.weeksPlan && p.weeksPlan[`W${idx+1}`] && p.weeksPlan[`W${idx+1}`].weight) || 0), 0));
+                const weightsAct = weeksList.map((_, idx) => activePlans.reduce((sum, p) => sum + parseFloat((p.weeksActual && p.weeksActual[`W${idx+1}`] && p.weeksActual[`W${idx+1}`].weight) || 0), 0));
+
+                datasets = [
+                    { label: 'Bobot Rencana (%)', data: weightsPlan, backgroundColor: '#2563eb' },
+                    { label: 'Bobot Realisasi (%)', data: weightsAct, backgroundColor: '#10b981' }
+                ];
+            } else if (appState.resumeChartMode === 'deviation') {
+                const devsWeight = weeksList.map((_, idx) => {
+                    const wp = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksPlan && p.weeksPlan[`W${idx+1}`] && p.weeksPlan[`W${idx+1}`].weight) || 0), 0);
+                    const wa = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksActual && p.weeksActual[`W${idx+1}`] && p.weeksActual[`W${idx+1}`].weight) || 0), 0);
+                    return wa - wp;
+                });
+
+                datasets = [{
+                    label: 'Deviasi Bobot (%)',
+                    data: devsWeight,
+                    borderColor: '#f43f5e',
+                    backgroundColor: 'rgba(244, 63, 94, 0.2)',
+                    fill: true,
+                    tension: 0.3
+                }];
+            }
+
+            if (chartResumeWeekly) chartResumeWeekly.destroy();
+            const ctx = document.getElementById('chart-resume-weekly').getContext('2d');
+            chartResumeWeekly = new Chart(ctx, {
+                type: (appState.resumeChartMode === 'deviation') ? 'line' : 'bar',
+                data: { labels, datasets },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function renderResumeEvaluationText(activePlans, weeksList, totCostPlan, totCostAct, devCost, totWeightPlan, totWeightAct, devWeight) {
+            const evalBox = document.getElementById('resume-evaluation-box');
+            if (activePlans.length === 0) {
+                evalBox.innerHTML = `<span class="text-slate-400">Data belum lengkap untuk melakukan analisis evaluasi bulanan secara menyeluruh. Silakan tambahkan Action Plan pada periode ini.</span>`;
+                return;
+            }
+
+            // Find min/max weekly deviations
+            let minDevWeek = null, maxDevWeek = null;
+            let minDevVal = Infinity, maxDevVal = -Infinity;
+
+            weeksList.forEach((w, idx) => {
+                const wKey = `W${idx + 1}`;
+                const wp = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksPlan && p.weeksPlan[wKey] && p.weeksPlan[wKey].weight) || 0), 0);
+                const wa = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksActual && p.weeksActual[wKey] && p.weeksActual[wKey].weight) || 0), 0);
+                const dev = wa - wp;
+
+                if (dev < minDevVal) { minDevVal = dev; minDevWeek = w; }
+                if (dev > maxDevVal) { maxDevVal = dev; maxDevWeek = w; }
+            });
+
+            // Find item plans under target & over budget
+            const underTargetItems = [];
+            const overBudgetItems = [];
+
+            activePlans.forEach(p => {
+                const totals = calculatePlanTotals(p, weeksList);
+                if (totals.totWeightAct < totals.totWeightPlan) {
+                    underTargetItems.push(`${p.name} (Deviasi: ${(totals.totWeightAct - totals.totWeightPlan).toFixed(2)}%)`);
+                }
+                if (totals.totCostAct > totals.totCostPlan) {
+                    overBudgetItems.push(`${p.name} (Selisih: +${formatRp(totals.totCostAct - totals.totCostPlan)})`);
+                }
+            });
+
+            let evalHtml = `<strong class="text-slate-900 font-bold">ANALISIS KINERJA DAN EVALUASI PROYEK:</strong>\n\n`;
+            
+            evalHtml += `1. <strong class="text-slate-800">Evaluasi Capaian Fisik:</strong> Realisasi bobot fisik kumulatif mencapai <span class="font-bold text-emerald-600">${totWeightAct.toFixed(2)}%</span> dari target rencana <span class="font-bold text-primary-600">${totWeightPlan.toFixed(2)}%</span> (Deviasi: <span class="font-bold ${devWeight >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${devWeight >= 0 ? '+' : ''}${devWeight.toFixed(2)}%</span>).\n`;
+            if (minDevWeek) evalHtml += `   • Minggu dengan deviasi negatif terbesar: <strong class="text-rose-600">${minDevWeek}</strong> (${minDevVal.toFixed(2)}%).\n`;
+            if (maxDevWeek) evalHtml += `   • Minggu dengan percepatan terbesar: <strong class="text-emerald-600">${maxDevWeek}</strong> (+${maxDevVal.toFixed(2)}%).\n\n`;
+
+            evalHtml += `2. <strong class="text-slate-800">Evaluasi Anggaran & Biaya:</strong> Total biaya aktual sebesar <span class="font-bold">${formatRp(totCostAct)}</span> berbanding alokasi biaya rencana <span class="font-bold">${formatRp(totCostPlan)}</span>.\n\n`;
+
+            evalHtml += `3. <strong class="text-slate-800">Item Pekerjaan Perlu Perhatian Khusus:</strong>\n`;
+            if (underTargetItems.length > 0) {
+                evalHtml += `   • <span class="text-rose-600 font-semibold">Pekerjaan di bawah target:</span> ${underTargetItems.join(', ')}.\n`;
+            } else {
+                evalHtml += `   • <span class="text-emerald-600 font-semibold">Seluruh item pekerjaan mencapai target rencana.</span>\n`;
+            }
+
+            if (overBudgetItems.length > 0) {
+                evalHtml += `   • <span class="text-amber-600 font-semibold">Pekerjaan melebihi anggaran rencana:</span> ${overBudgetItems.join(', ')}.\n\n`;
+            } else {
+                evalHtml += `   • <span class="text-emerald-600 font-semibold">Tidak ada pekerjaan yang mengalami over-budget.</span>\n\n`;
+            }
+
+            evalHtml += `4. <strong class="text-slate-800">Rekomendasi Tindak Lanjut:</strong>\n`;
+            if (devWeight < 0) {
+                evalHtml += `   • Lakukan *Catch-up Plan* dengan penambahan jam kerja (lembur) dan peningkatan pasokan sumber daya pada minggu mendatang.\n`;
+            } else {
+                evalHtml += `   • Pertahankan ritme kerja dan koordinasi dengan subkontraktor/vendor untuk menjaga stabilitas progress.\n`;
+            }
+            if (devCost > 0) {
+                evalHtml += `   • Lakukan efisiensi pengeluaran dan audit biaya operasional pada item pekerjaan yang mengalami kenaikan alokasi anggaran.\n`;
+            }
+
+            evalBox.innerHTML = evalHtml;
+        }
+
+        function exportResumeExcel() {
+            const activePlans = filterPlansByGlobalPeriod();
+            const weeksList = getActiveWeeksList(appState.globalYear, appState.globalMonth);
+
+            const itemData = activePlans.map((p, idx) => {
+                const totals = calculatePlanTotals(p, weeksList);
+                return {
+                    'No': idx + 1,
+                    'Nama Action Plan': p.name,
+                    'Satuan': p.satuan,
+                    'Vol Rencana': totals.totVolPlan,
+                    'Vol Realisasi': totals.totVolAct,
+                    'Biaya Rencana (Rp)': totals.totCostPlan,
+                    'Biaya Realisasi (Rp)': totals.totCostAct,
+                    'Bobot Rencana (%)': totals.totWeightPlan,
+                    'Bobot Realisasi (%)': totals.totWeightAct,
+                    'Deviasi Bobot (%)': totals.totWeightAct - totals.totWeightPlan
+                };
+            });
+
+            const weeklyData = weeksList.map((w, idx) => {
+                const wKey = `W${idx + 1}`;
+                const wCostPlan = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksPlan && p.weeksPlan[wKey] && p.weeksPlan[wKey].cost) || 0), 0);
+                const wCostAct = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksActual && p.weeksActual[wKey] && p.weeksActual[wKey].cost) || 0), 0);
+                const wWeightPlan = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksPlan && p.weeksPlan[wKey] && p.weeksPlan[wKey].weight) || 0), 0);
+                const wWeightAct = activePlans.reduce((sum, p) => sum + parseFloat((p.weeksActual && p.weeksActual[wKey] && p.weeksActual[wKey].weight) || 0), 0);
+
+                return {
+                    'Minggu': w,
+                    'Biaya Rencana (Rp)': wCostPlan,
+                    'Biaya Realisasi (Rp)': wCostAct,
+                    'Deviasi Biaya (Rp)': wCostAct - wCostPlan,
+                    'Bobot Rencana (%)': wWeightPlan,
+                    'Bobot Realisasi (%)': wWeightAct,
+                    'Deviasi Bobot (%)': wWeightAct - wWeightPlan
+                };
+            });
+
+            const wb = XLSX.utils.book_new();
+            const wsItems = XLSX.utils.json_to_sheet(itemData);
+            const wsWeekly = XLSX.utils.json_to_sheet(weeklyData);
+
+            XLSX.utils.book_append_sheet(wb, wsItems, "Rincian Item Pekerjaan");
+            XLSX.utils.book_append_sheet(wb, wsWeekly, "Monitoring Mingguan");
+
+            XLSX.writeFile(wb, `Resume_Action_Plan_${appState.globalYear}_${appState.globalMonth}.xlsx`);
+        }
+
+        // ==========================================
+        // 10. MODAL CRUD FOR ACTION PLANS
+        // ==========================================
+        function openPlanModal(planId = null) {
+            populateModalDropdowns();
+            const modal = document.getElementById('plan-modal');
+            const form = document.getElementById('plan-form');
+            form.reset();
+
+            if (planId) {
+                const plan = appState.plans.find(p => p.id === planId);
+                if (plan) {
+                    document.getElementById('plan-modal-title').textContent = 'Edit Action Plan Pekerjaan';
+                    document.getElementById('modal-plan-id').value = plan.id;
+                    document.getElementById('modal-plan-year').value = plan.year;
+                    document.getElementById('modal-plan-month').value = plan.month;
+                    document.getElementById('modal-plan-satuan').value = plan.satuan;
+                    document.getElementById('modal-plan-name').value = plan.name;
+                    document.getElementById('modal-plan-divisi').value = plan.divisi;
+                    document.getElementById('modal-plan-pic').value = plan.pic;
+                    document.getElementById('modal-plan-uraian').value = plan.uraian || '';
+                    renderModalWeeklyInputs(plan);
+                }
+            } else {
+                document.getElementById('plan-modal-title').textContent = 'Tambah Action Plan Baru';
+                document.getElementById('modal-plan-id').value = '';
+                document.getElementById('modal-plan-year').value = appState.globalYear;
+                document.getElementById('modal-plan-month').value = (appState.globalMonth === 'ALL') ? 0 : appState.globalMonth;
+                renderModalWeeklyInputs();
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closePlanModal() {
+            document.getElementById('plan-modal').classList.add('hidden');
+        }
+
+        function populateModalDropdowns() {
+            const yearSel = document.getElementById('modal-plan-year');
+            const monthSel = document.getElementById('modal-plan-month');
+            const divisiSel = document.getElementById('modal-plan-divisi');
+            const picSel = document.getElementById('modal-plan-pic');
+
+            yearSel.innerHTML = '';
+            for (let y = 2025; y <= 2028; y++) {
+                yearSel.innerHTML += `<option value="${y}">Tahun ${y}</option>`;
+            }
+
+            monthSel.innerHTML = '';
+            MONTH_NAMES.forEach((m, idx) => {
+                monthSel.innerHTML += `<option value="${idx}">${m}</option>`;
+            });
+
+            divisiSel.innerHTML = '';
+            appState.divisions.forEach(d => divisiSel.innerHTML += `<option value="${d}">${d}</option>`);
+
+            picSel.innerHTML = '';
+            appState.pics.forEach(p => picSel.innerHTML += `<option value="${p}">${p}</option>`);
+        }
+
+        function renderModalWeeklyInputs(existingPlan = null) {
+            const year = parseInt(document.getElementById('modal-plan-year').value || appState.globalYear);
+            const month = parseInt(document.getElementById('modal-plan-month').value || 0);
+            const weeksList = getActiveWeeksList(year, month);
+
+            const container = document.getElementById('modal-weekly-inputs-container');
+            container.innerHTML = '';
+
+            weeksList.forEach((w, idx) => {
+                const wKey = `W${idx + 1}`;
+                const wp = (existingPlan && existingPlan.weeksPlan && existingPlan.weeksPlan[wKey]) || { vol: 0, cost: 0, weight: 0 };
+
+                container.innerHTML += `
+                    <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-lg grid grid-cols-3 gap-2">
+                        <div class="col-span-3 font-semibold text-slate-700 text-[11px]">${w}</div>
+                        <div>
+                            <label class="text-[10px] text-slate-500">Volume</label>
+                            <input type="number" step="any" id="modal-w-vol-${wKey}" value="${wp.vol}" class="w-full px-2 py-1 border border-slate-300 rounded">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-500">Biaya (Rp)</label>
+                            <input type="number" step="any" id="modal-w-cost-${wKey}" value="${wp.cost}" class="w-full px-2 py-1 border border-slate-300 rounded">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-500">Bobot (%)</label>
+                            <input type="number" step="any" id="modal-w-weight-${wKey}" value="${wp.weight}" class="w-full px-2 py-1 border border-slate-300 rounded font-semibold text-primary-600">
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function savePlanModal(e) {
+            e.preventDefault();
+            const id = document.getElementById('modal-plan-id').value;
+            const year = parseInt(document.getElementById('modal-plan-year').value);
+            const month = parseInt(document.getElementById('modal-plan-month').value);
+            const satuan = document.getElementById('modal-plan-satuan').value;
+            const name = document.getElementById('modal-plan-name').value;
+            const divisi = document.getElementById('modal-plan-divisi').value;
+            const pic = document.getElementById('modal-plan-pic').value;
+            const uraian = document.getElementById('modal-plan-uraian').value;
+
+            const weeksList = getActiveWeeksList(year, month);
+            const weeksPlan = {};
+            const weeksActual = {};
+
+            weeksList.forEach((_, idx) => {
+                const wKey = `W${idx + 1}`;
+                const vol = parseFloat(document.getElementById(`modal-w-vol-${wKey}`).value || 0);
+                const cost = parseFloat(document.getElementById(`modal-w-cost-${wKey}`).value || 0);
+                const weight = parseFloat(document.getElementById(`modal-w-weight-${wKey}`).value || 0);
+
+                weeksPlan[wKey] = { vol, cost, weight };
+                
+                // Preserve actual if exists
+                let existingPlan = appState.plans.find(p => p.id === id);
+                if (existingPlan && existingPlan.weeksActual && existingPlan.weeksActual[wKey]) {
+                    weeksActual[wKey] = existingPlan.weeksActual[wKey];
+                } else {
+                    weeksActual[wKey] = { vol: 0, cost: 0, weight: 0 };
+                }
+            });
+
+            if (id) {
+                // Edit
+                const idx = appState.plans.findIndex(p => p.id === id);
+                if (idx !== -1) {
+                    appState.plans[idx] = { id, year, month, name, satuan, divisi, pic, uraian, weeksPlan, weeksActual };
+                }
+            } else {
+                // Add New
+                const newId = `plan-${Date.now()}`;
+                appState.plans.push({ id: newId, year, month, name, satuan, divisi, pic, uraian, weeksPlan, weeksActual });
+            }
+
+            saveStateToStorage();
+            closePlanModal();
+            refreshActivePanel();
+        }
+
+        function deletePlan(planId) {
+            if (confirm('Apakah Anda yakin ingin menghapus Action Plan ini?')) {
+                appState.plans = appState.plans.filter(p => p.id !== planId);
+                saveStateToStorage();
+                refreshActivePanel();
+            }
+        }
+
+        // ==========================================
+        // 11. DATA MASTER MANAGEMENT
+        // ==========================================
+        function renderMasterLists() {
+            const divList = document.getElementById('master-division-list');
+            const picList = document.getElementById('master-pic-list');
+
+            divList.innerHTML = '';
+            appState.divisions.forEach((d, idx) => {
+                divList.innerHTML += `
+                    <li class="py-2 flex justify-between items-center">
+                        <span>${d}</span>
+                        <button onclick="removeMasterDivision(${idx})" class="text-rose-600 hover:text-rose-800 text-xs"><i class="fa-solid fa-trash"></i></button>
+                    </li>
+                `;
+            });
+
+            picList.innerHTML = '';
+            appState.pics.forEach((p, idx) => {
+                picList.innerHTML += `
+                    <li class="py-2 flex justify-between items-center">
+                        <span>${p}</span>
+                        <button onclick="removeMasterPIC(${idx})" class="text-rose-600 hover:text-rose-800 text-xs"><i class="fa-solid fa-trash"></i></button>
+                    </li>
+                `;
+            });
+        }
+
+        function addMasterDivision() {
+            const val = document.getElementById('input-new-division').value.trim();
+            if (val && !appState.divisions.includes(val)) {
+                appState.divisions.push(val);
+                document.getElementById('input-new-division').value = '';
+                saveStateToStorage();
+                renderMasterLists();
+            }
+        }
+
+        function removeMasterDivision(idx) {
+            appState.divisions.splice(idx, 1);
+            saveStateToStorage();
+            renderMasterLists();
+        }
+
+        function addMasterPIC() {
+            const val = document.getElementById('input-new-pic').value.trim();
+            if (val && !appState.pics.includes(val)) {
+                appState.pics.push(val);
+                document.getElementById('input-new-pic').value = '';
+                saveStateToStorage();
+                renderMasterLists();
+            }
+        }
+
+        function removeMasterPIC(idx) {
+            appState.pics.splice(idx, 1);
+            saveStateToStorage();
+            renderMasterLists();
+        }
+
+        // ==========================================
+        // 12. EXPORT & SYSTEM BACKUP
+        // ==========================================
+        function exportMatrixExcel(type) {
+            const activePlans = filterPlansByGlobalPeriod();
+            const weeksList = getActiveWeeksList(appState.globalYear, appState.globalMonth);
+
+            const exportData = activePlans.map((p, idx) => {
+                const totals = calculatePlanTotals(p, weeksList);
+                let row = {
+                    'No': idx + 1,
+                    'Nama Action Plan': p.name,
+                    'Satuan': p.satuan,
+                    'Divisi': p.divisi,
+                    'PIC': p.pic,
+                    'Total Vol': (type === 'rencana') ? totals.totVolPlan : totals.totVolAct,
+                    'Total Biaya (Rp)': (type === 'rencana') ? totals.totCostPlan : totals.totCostAct,
+                    'Total Bobot (%)': (type === 'rencana') ? totals.totWeightPlan : totals.totWeightAct
+                };
+
+                weeksList.forEach((w, wIdx) => {
+                    const wKey = `W${wIdx + 1}`;
+                    const targetData = (type === 'rencana') 
+                        ? (p.weeksPlan && p.weeksPlan[wKey]) || { vol: 0, cost: 0, weight: 0 }
+                        : (p.weeksActual && p.weeksActual[wKey]) || { vol: 0, cost: 0, weight: 0 };
+
+                    row[`${w} Vol`] = targetData.vol;
+                    row[`${w} Biaya`] = targetData.cost;
+                    row[`${w} Bobot (%)`] = targetData.weight;
+                });
+
+                return row;
+            });
+
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, `${type.toUpperCase()}`);
+            XLSX.writeFile(wb, `Action_Plan_${type}_${appState.globalYear}_${appState.globalMonth}.xlsx`);
+        }
+
+        function exportBackupJSON() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `Action_Plan_Backup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importBackupJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (imported && imported.plans) {
+                        appState = imported;
+                        saveStateToStorage();
+                        alert('Restore data JSON berhasil!');
+                        location.reload();
+                    } else {
+                        alert('Format file JSON tidak valid.');
+                    }
+                } catch(err) {
+                    alert('Gagal membaca file JSON.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function resetAllSystemData() {
+            if (confirm('Apakah Anda benar-benar yakin ingin mereset seluruh data?')) {
+                localStorage.removeItem('action_plan_app_state_v4');
+                loadDefaultSampleData();
+                alert('Data berhasil di-reset ke default.');
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
