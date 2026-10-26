@@ -287,7 +287,7 @@
                 </div>
             </section>
 
-            <!-- 4. RENCANA KURVA S -->
+            <!-- 4. RENCANA KURVA S (TERINTEGRASI OTOMATIS DENGAN RENCANA ACTION PLAN & 2-WAY SYNC) -->
             <section id="panel-kurva-rencana" class="panel-content hidden space-y-4">
                 <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-3">
                     <div class="flex items-center gap-3">
@@ -297,8 +297,8 @@
                         <input type="text" id="search-kurva-rencana" onkeyup="renderKurvaRencanaTable()" placeholder="Cari Pekerjaan / Sub..." class="px-3 py-1.5 text-xs border border-slate-300 rounded-lg w-48 sm:w-64">
                     </div>
                     <div class="flex items-center gap-2">
-                        <button onclick="openKurvaRencanaModal()" class="px-3.5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-xs font-semibold">+ Action Plan Utama</button>
-                        <button onclick="addWeekToKurvaRencanaPeriod()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold">+ Tambah Minggu</button>
+                        <button onclick="openPlanModal()" class="px-3.5 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-xs font-semibold">+ Action Plan Utama</button>
+                        <button onclick="addWeekToCurrentPeriod()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold">+ Tambah Minggu</button>
                         <button onclick="exportKurvaExcel('rencana')" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold">Ekspor Excel</button>
                     </div>
                 </div>
@@ -686,69 +686,6 @@
         </div>
     </div>
 
-    <!-- MODAL FORM KURVA RENCANA -->
-    <div id="kurva-rencana-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[92vh]">
-            <div class="px-6 py-4 bg-slate-800 text-white flex justify-between items-center">
-                <h3 id="kurva-rencana-modal-title" class="font-bold text-sm">Tambah Action Plan Utama (Rencana Kurva S)</h3>
-                <button onclick="closeKurvaRencanaModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            
-            <form id="kurva-rencana-form" onsubmit="saveKurvaRencanaModal(event)" class="p-6 space-y-5 overflow-y-auto flex-1 text-xs">
-                <input type="hidden" id="modal-kr-id">
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Periode Tahun</label>
-                        <select id="modal-kr-year" class="w-full px-3 py-2 border border-slate-300 rounded-lg"></select>
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Periode Bulan</label>
-                        <select id="modal-kr-month" class="w-full px-3 py-2 border border-slate-300 rounded-lg"></select>
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Satuan Induk</label>
-                        <input type="text" id="modal-kr-satuan" placeholder="Ls / Unit" class="w-full px-3 py-2 border border-slate-300 rounded-lg">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Nama Action Plan Pekerjaan Utama</label>
-                    <input type="text" id="modal-kr-name" required placeholder="Nama Pekerjaan Utama..." class="w-full px-3 py-2 border border-slate-300 rounded-lg font-bold">
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">Divisi / Unit Kerja</label>
-                        <select id="modal-kr-divisi" class="w-full px-3 py-2 border border-slate-300 rounded-lg"></select>
-                    </div>
-                    <div>
-                        <label class="block font-semibold text-slate-700 mb-1">PIC / Penanggung Jawab</label>
-                        <select id="modal-kr-pic" class="w-full px-3 py-2 border border-slate-300 rounded-lg"></select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block font-semibold text-slate-700 mb-1">Uraian Pekerjaan & Keterangan</label>
-                    <textarea id="modal-kr-uraian" rows="2" placeholder="Uraian detail..." class="w-full px-3 py-2 border border-slate-300 rounded-lg"></textarea>
-                </div>
-
-                <div class="border-t border-slate-200 pt-4 space-y-3">
-                    <div class="flex items-center justify-between">
-                        <h4 class="font-bold text-slate-800 text-xs"><i class="fa-solid fa-sitemap text-primary-600"></i> Rincian Sub Pekerjaan (Kurva S Rencana)</h4>
-                        <button type="button" onclick="addModalKurvaSubtaskRow()" class="px-3 py-1.5 bg-slate-800 text-white font-semibold rounded-lg text-xs">+ Sub Pekerjaan</button>
-                    </div>
-                    <div class="space-y-3 max-h-60 overflow-y-auto pr-1" id="modal-kr-subtasks-list-container"></div>
-                </div>
-
-                <div class="pt-4 border-t border-slate-200 flex justify-end gap-2">
-                    <button type="button" onclick="closeKurvaRencanaModal()" class="px-4 py-2 bg-slate-200 font-semibold rounded-lg">Batal</button>
-                    <button type="submit" class="px-4 py-2 bg-primary-600 text-white font-semibold rounded-lg">Simpan Rencana Kurva S</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <!-- FIREBASE MODULE & APPLICATION REAL-TIME LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -789,15 +726,10 @@
             periodWeeks: {
                 "2026-2": ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4", "Minggu 5"]
             },
-            kurvaRencanaWeeks: {
-                "2026-2": ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4", "Minggu 5"]
-            },
-            plans: [],
-            kurvaRencanaPlans: []
+            plans: []
         };
 
         let currentModalSubtasks = [];
-        let currentModalKurvaSubtasks = [];
         let currentUser = null;
         let isAuthorized = false;
 
@@ -909,7 +841,6 @@
                     if (data.divisions) appState.divisions = data.divisions;
                     if (data.pics) appState.pics = data.pics;
                     if (data.periodWeeks) appState.periodWeeks = data.periodWeeks;
-                    if (data.kurvaRencanaWeeks) appState.kurvaRencanaWeeks = data.kurvaRencanaWeeks;
                     renderMasterLists();
                 } else {
                     saveMasterConfigToFirestore();
@@ -926,15 +857,6 @@
                 showSavingStatus(false);
             }, (err) => showSyncError(err));
 
-            onSnapshot(collection(db, 'kurva_rencana_plans'), (snapshot) => {
-                showSavingStatus(true);
-                const krPlans = [];
-                snapshot.forEach((doc) => { krPlans.push(doc.data()); });
-                appState.kurvaRencanaPlans = krPlans;
-                refreshActivePanel();
-                showSavingStatus(false);
-            }, (err) => showSyncError(err));
-
             const inviteUrl = window.location.origin + window.location.pathname + '?token=NINDYA2026-TEAM';
             document.getElementById('share-invite-url').value = inviteUrl;
         }
@@ -944,7 +866,6 @@
                 divisions: appState.divisions,
                 pics: appState.pics,
                 periodWeeks: appState.periodWeeks,
-                kurvaRencanaWeeks: appState.kurvaRencanaWeeks,
                 updatedAt: serverTimestamp()
             });
         }
@@ -1055,18 +976,9 @@
             if (month === 'ALL') return ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4"];
             const key = `${year}-${month}`;
             if (!appState.periodWeeks[key]) {
-                appState.periodWeeks[key] = ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4"];
+                appState.periodWeeks[key] = ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4", "Minggu 5"];
             }
             return appState.periodWeeks[key];
-        }
-
-        function getKurvaRencanaWeeksList(year, month) {
-            if (month === 'ALL') return ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4"];
-            const key = `${year}-${month}`;
-            if (!appState.kurvaRencanaWeeks[key]) {
-                appState.kurvaRencanaWeeks[key] = ["Minggu 1", "Minggu 2", "Minggu 3", "Minggu 4"];
-            }
-            return appState.kurvaRencanaWeeks[key];
         }
 
         window.addWeekToCurrentPeriod = async function() {
@@ -1080,27 +992,8 @@
             refreshActivePanel();
         };
 
-        window.addWeekToKurvaRencanaPeriod = async function() {
-            if (appState.globalMonth === 'ALL') {
-                alert('Pilih bulan spesifik untuk menambah minggu Rencana Kurva S.');
-                return;
-            }
-            const activeWeeks = getKurvaRencanaWeeksList(appState.globalYear, appState.globalMonth);
-            activeWeeks.push(`Minggu ${activeWeeks.length + 1}`);
-            await saveMasterConfigToFirestore();
-            refreshActivePanel();
-        };
-
         function filterPlansByGlobalPeriod() {
             return appState.plans.filter(p => {
-                const matchYear = p.year === appState.globalYear;
-                const matchMonth = (appState.globalMonth === 'ALL') || (p.month === appState.globalMonth);
-                return matchYear && matchMonth;
-            });
-        }
-
-        function filterKurvaRencanaPlansByGlobalPeriod() {
-            return appState.kurvaRencanaPlans.filter(p => {
                 const matchYear = p.year === appState.globalYear;
                 const matchMonth = (appState.globalMonth === 'ALL') || (p.month === appState.globalMonth);
                 return matchYear && matchMonth;
@@ -1126,18 +1019,6 @@
             });
 
             return { totVolPlan, totCostPlan, totWeightPlan, totVolAct, totCostAct, totWeightAct };
-        }
-
-        function calculateKurvaSubtaskTotals(subtask, weeksList) {
-            let totVol = 0, totCost = 0, totWeight = 0;
-            weeksList.forEach((_, idx) => {
-                const wKey = `W${idx + 1}`;
-                const w = (subtask.weeks && subtask.weeks[wKey]) || { vol: 0, cost: 0, weight: 0 };
-                totVol += parseFloat(w.vol || 0);
-                totCost += parseFloat(w.cost || 0);
-                totWeight += parseFloat(w.weight || 0);
-            });
-            return { totVol, totCost, totWeight };
         }
 
         function calculateParentPlanTotals(plan, weeksList) {
@@ -1170,29 +1051,6 @@
                 };
             }
             return { totVolPlan: 0, totVolAct: 0, totCostPlan: 0, totCostAct: 0, totWeightPlan: 0, totWeightAct: 0, satuan: plan.satuan || '—' };
-        }
-
-        function calculateParentKurvaPlanTotals(plan, weeksList) {
-            if (plan.subtasks && plan.subtasks.length > 0) {
-                let totCost = 0, totWeight = 0, totVol = 0;
-                let sameUnit = true;
-                const firstUnit = plan.subtasks[0].satuan;
-
-                plan.subtasks.forEach(s => {
-                    const st = calculateKurvaSubtaskTotals(s, weeksList);
-                    totCost += st.totCost;
-                    totWeight += st.totWeight;
-                    if (s.satuan === firstUnit && sameUnit) totVol += st.totVol;
-                    else sameUnit = false;
-                });
-
-                return {
-                    totVol: sameUnit ? totVol : '—',
-                    totCost, totWeight,
-                    satuan: sameUnit ? firstUnit : (plan.satuan || '—')
-                };
-            }
-            return { totVol: 0, totCost: 0, totWeight: 0, satuan: plan.satuan || '—' };
         }
 
         window.handleInputFocus = function(el) {
@@ -1254,35 +1112,6 @@
             sub.weeksActual[weekKey][field] = parseFloat(value || 0);
 
             await updateDoc(doc(db, 'action_plans', planId), {
-                subtasks: updatedSubtasks,
-                updatedAt: serverTimestamp(),
-                updatedBy: currentUser.uid
-            });
-            showSavingStatus(false);
-        };
-
-        window.handleKurvaInputBlur = async function(el, planId, subId, weekKey, field) {
-            let typed = el.value.trim();
-            let num = parseIdNumber(typed);
-            el.setAttribute('data-raw', num);
-            
-            if (field === 'cost') el.value = formatRp(num);
-            else if (field === 'weight') el.value = formatWeightId(num);
-            else el.value = formatVolumeId(num);
-
-            showSavingStatus(true);
-            const plan = appState.kurvaRencanaPlans.find(p => p.id === planId);
-            if (!plan || !plan.subtasks) return;
-
-            const updatedSubtasks = JSON.parse(JSON.stringify(plan.subtasks));
-            const sub = updatedSubtasks.find(s => s.id === subId);
-            if (!sub) return;
-
-            if (!sub.weeks) sub.weeks = {};
-            if (!sub.weeks[weekKey]) sub.weeks[weekKey] = { vol: 0, cost: 0, weight: 0 };
-            sub.weeks[weekKey][field] = parseFloat(num || 0);
-
-            await updateDoc(doc(db, 'kurva_rencana_plans', planId), {
                 subtasks: updatedSubtasks,
                 updatedAt: serverTimestamp(),
                 updatedBy: currentUser.uid
@@ -1580,8 +1409,8 @@
         };
 
         window.renderKurvaRencanaTable = function() {
-            const activePlans = filterKurvaRencanaPlansByGlobalPeriod();
-            const weeksList = getKurvaRencanaWeeksList(appState.globalYear, appState.globalMonth);
+            const activePlans = filterPlansByGlobalPeriod();
+            const weeksList = getActiveWeeksList(appState.globalYear, appState.globalMonth);
 
             const hRow1 = document.getElementById('kurva-rencana-header-row-1');
             const hRow2 = document.getElementById('kurva-rencana-header-row-2');
@@ -1600,7 +1429,6 @@
                 <th class="p-2 border-r border-slate-600 text-center bg-slate-800 text-primary-300">Jumlah (Rp)</th>
                 <th class="p-2 border-r border-slate-600 text-center bg-slate-800 text-primary-300">Bobot (%)</th>`;
             weeksList.forEach(() => h2Html += `<th class="p-2 border-r border-slate-600 text-center">Vol</th><th class="p-2 border-r border-slate-600 text-center">Jumlah (Rp)</th><th class="p-2 border-r border-slate-600 text-center">Bobot (%)</th>`);
-            h2Html += `<th></th>`;
             hRow2.innerHTML = h2Html;
 
             tbody.innerHTML = '';
@@ -1608,28 +1436,28 @@
             let kumWeights = weeksList.map(() => 0);
 
             activePlans.forEach((plan, idx) => {
-                const parentTotals = calculateParentKurvaPlanTotals(plan, weeksList);
-                grandCost += parentTotals.totCost;
-                grandWeight += parentTotals.totWeight;
-                const parentVolDisp = typeof parentTotals.totVol === 'number' ? formatVolumeId(parentTotals.totVol) : '—';
+                const parentTotals = calculateParentPlanTotals(plan, weeksList);
+                grandCost += parentTotals.totCostPlan;
+                grandWeight += parentTotals.totWeightPlan;
+                const parentVolDisp = typeof parentTotals.totVolPlan === 'number' ? formatVolumeId(parentTotals.totVolPlan) : '—';
 
                 let rowHtml = `<tr class="bg-slate-100 font-bold border-b border-slate-300">
                     <td class="p-3 border-r border-slate-300 sticky-col-1 text-center bg-slate-100">${idx + 1}</td>
                     <td class="p-3 border-r border-slate-300 sticky-col-2 bg-slate-100">${plan.name}</td>
                     <td class="p-3 border-r border-slate-300 sticky-col-3 text-center bg-slate-100">${parentTotals.satuan}</td>
                     <td class="p-2 border-r border-slate-300 text-center bg-primary-50">${parentVolDisp}</td>
-                    <td class="p-2 border-r border-slate-300 text-right bg-primary-50">${formatRp(parentTotals.totCost)}</td>
-                    <td class="p-2 border-r border-slate-300 text-center bg-primary-50 text-primary-700">${formatWeightId(parentTotals.totWeight)}</td>`;
+                    <td class="p-2 border-r border-slate-300 text-right bg-primary-50">${formatRp(parentTotals.totCostPlan)}</td>
+                    <td class="p-2 border-r border-slate-300 text-center bg-primary-50 text-primary-700">${formatWeightId(parentTotals.totWeightPlan)}</td>`;
 
                 weeksList.forEach((_, wIdx) => {
                     const wKey = `W${wIdx + 1}`;
                     let wVol = 0, wCost = 0, wWeight = 0;
                     if (plan.subtasks) {
                         plan.subtasks.forEach(s => {
-                            const w = (s.weeks && s.weeks[wKey]) || { vol: 0, cost: 0, weight: 0 };
-                            wVol += parseFloat(w.vol || 0);
-                            wCost += parseFloat(w.cost || 0);
-                            wWeight += parseFloat(w.weight || 0);
+                            const wp = (s.weeksPlan && s.weeksPlan[wKey]) || { vol: 0, cost: 0, weight: 0 };
+                            wVol += parseFloat(wp.vol || 0);
+                            wCost += parseFloat(wp.cost || 0);
+                            wWeight += parseFloat(wp.weight || 0);
                         });
                     }
                     kumWeights[wIdx] += wWeight;
@@ -1637,28 +1465,28 @@
                 });
 
                 rowHtml += `<td class="p-2 text-center no-print">
-                    <button onclick="openKurvaRencanaModal('${plan.id}')" class="p-1 text-blue-600"><i class="fa-solid fa-pen-to-square"></i></button>
-                    <button onclick="deleteKurvaRencanaPlan('${plan.id}')" class="p-1 text-rose-600"><i class="fa-solid fa-trash"></i></button>
+                    <button onclick="openPlanModal('${plan.id}')" class="p-1 text-blue-600"><i class="fa-solid fa-pen-to-square"></i></button>
+                    <button onclick="deletePlan('${plan.id}')" class="p-1 text-rose-600"><i class="fa-solid fa-trash"></i></button>
                 </td></tr>`;
                 tbody.innerHTML += rowHtml;
 
                 if (plan.subtasks) {
                     plan.subtasks.forEach((sub, sIdx) => {
-                        const subTotals = calculateKurvaSubtaskTotals(sub, weeksList);
+                        const subTotals = calculateSubtaskTotals(sub, weeksList);
                         let subRowHtml = `<tr class="subtask-row text-xs border-b border-slate-200">
                             <td class="p-2.5 border-r border-slate-200 sticky-col-1 text-center bg-slate-50">${idx + 1}.${sIdx + 1}</td>
                             <td class="p-2.5 border-r border-slate-200 sticky-col-2 pl-8 bg-slate-50">↳ ${sub.name}</td>
                             <td class="p-2.5 border-r border-slate-200 sticky-col-3 text-center bg-slate-50">${sub.satuan}</td>
-                            <td class="p-2 border-r border-slate-200 text-center">${formatVolumeId(subTotals.totVol)}</td>
-                            <td class="p-2 border-r border-slate-200 text-right">${formatRp(subTotals.totCost)}</td>
-                            <td class="p-2 border-r border-slate-200 text-center font-semibold text-primary-600">${formatWeightId(subTotals.totWeight)}</td>`;
+                            <td class="p-2 border-r border-slate-200 text-center">${formatVolumeId(subTotals.totVolPlan)}</td>
+                            <td class="p-2 border-r border-slate-200 text-right">${formatRp(subTotals.totCostPlan)}</td>
+                            <td class="p-2 border-r border-slate-200 text-center font-semibold text-primary-600">${formatWeightId(subTotals.totWeightPlan)}</td>`;
 
                         weeksList.forEach((_, wIdx) => {
                             const wKey = `W${wIdx + 1}`;
-                            const w = (sub.weeks && sub.weeks[wKey]) || { vol: 0, cost: 0, weight: 0 };
-                            subRowHtml += `<td class="p-1 border-r border-slate-200 text-center"><input type="text" data-raw="${w.vol}" value="${formatVolumeId(w.vol)}" onfocus="handleInputFocus(this)" onblur="handleKurvaInputBlur(this, '${plan.id}', '${sub.id}', '${wKey}', 'vol')" class="w-20 text-center border rounded text-xs bg-white"></td>
-                                <td class="p-1 border-r border-slate-200 text-right"><input type="text" data-raw="${w.cost}" value="${formatRp(w.cost)}" onfocus="handleInputFocus(this)" onblur="handleKurvaInputBlur(this, '${plan.id}', '${sub.id}', '${wKey}', 'cost')" class="w-28 text-right border rounded text-xs bg-white"></td>
-                                <td class="p-1 border-r border-slate-200 text-center"><input type="text" data-raw="${w.weight}" value="${formatWeightId(w.weight)}" onfocus="handleInputFocus(this)" onblur="handleKurvaInputBlur(this, '${plan.id}', '${sub.id}', '${wKey}', 'weight')" class="w-24 text-center border rounded text-xs font-semibold text-primary-600 bg-white"></td>`;
+                            const wp = (sub.weeksPlan && sub.weeksPlan[wKey]) || { vol: 0, cost: 0, weight: 0 };
+                            subRowHtml += `<td class="p-1 border-r border-slate-200 text-center"><input type="text" data-raw="${wp.vol}" value="${formatVolumeId(wp.vol)}" onfocus="handleInputFocus(this)" onblur="handleInputBlur(this, '${plan.id}', '${sub.id}', '${wKey}', 'vol', false)" class="w-20 text-center border rounded text-xs bg-white"></td>
+                                <td class="p-1 border-r border-slate-200 text-right"><input type="text" data-raw="${wp.cost}" value="${formatRp(wp.cost)}" onfocus="handleInputFocus(this)" onblur="handleInputBlur(this, '${plan.id}', '${sub.id}', '${wKey}', 'cost', false)" class="w-28 text-right border rounded text-xs bg-white"></td>
+                                <td class="p-1 border-r border-slate-200 text-center"><input type="text" data-raw="${wp.weight}" value="${formatWeightId(wp.weight)}" onfocus="handleInputFocus(this)" onblur="handleInputBlur(this, '${plan.id}', '${sub.id}', '${wKey}', 'weight', false)" class="w-24 text-center border rounded text-xs font-semibold text-primary-600 bg-white"></td>`;
                         });
                         subRowHtml += `<td class="p-2 text-center no-print">—</td></tr>`;
                         tbody.innerHTML += subRowHtml;
@@ -1772,10 +1600,8 @@
         }
 
         function renderKurvaResumePanel() {
-            const krPlans = filterKurvaRencanaPlansByGlobalPeriod();
-            const actPlans = filterPlansByGlobalPeriod();
+            const activePlans = filterPlansByGlobalPeriod();
             const weeksList = getActiveWeeksList(appState.globalYear, appState.globalMonth);
-            const krWeeksList = getKurvaRencanaWeeksList(appState.globalYear, appState.globalMonth);
             const searchQuery = (document.getElementById('search-kurva-resume')?.value || "").toLowerCase();
 
             const periodText = (appState.globalMonth === 'ALL') 
@@ -1791,68 +1617,57 @@
             tbody.innerHTML = '';
 
             let filteredCount = 0;
-            krPlans.forEach((kPlan, idx) => {
-                const matchPlanName = kPlan.name.toLowerCase().includes(searchQuery);
-                const matchingSubtasks = (kPlan.subtasks || []).filter(sub => matchPlanName || sub.name.toLowerCase().includes(searchQuery));
+            activePlans.forEach((plan, idx) => {
+                const matchPlanName = plan.name.toLowerCase().includes(searchQuery);
+                const matchingSubtasks = (plan.subtasks || []).filter(sub => matchPlanName || sub.name.toLowerCase().includes(searchQuery));
 
                 if (!matchPlanName && matchingSubtasks.length === 0 && searchQuery !== "") return;
 
-                const pTotals = calculateParentKurvaPlanTotals(kPlan, krWeeksList);
-                const matchingActPlan = actPlans.find(ap => ap.name.toLowerCase() === kPlan.name.toLowerCase()) || actPlans[idx];
-                const actTotals = matchingActPlan ? calculateParentPlanTotals(matchingActPlan, weeksList) : { totVolAct: 0, totCostAct: 0, totWeightAct: 0 };
+                const totals = calculateParentPlanTotals(plan, weeksList);
+                totCostPlan += totals.totCostPlan;
+                totCostAct += totals.totCostAct;
+                totWeightPlan += totals.totWeightPlan;
+                totWeightAct += totals.totWeightAct;
 
-                totCostPlan += pTotals.totCost;
-                totCostAct += actTotals.totCostAct;
-                totWeightPlan += pTotals.totWeight;
-                totWeightAct += actTotals.totWeightAct;
-
-                const volPlanDisp = typeof pTotals.totVol === 'number' ? formatVolumeId(pTotals.totVol) : '—';
-                const volActDisp = typeof actTotals.totVolAct === 'number' ? formatVolumeId(actTotals.totVolAct) : '—';
-                const dev = actTotals.totWeightAct - pTotals.totWeight;
-                const achVal = calculateAchievement(actTotals.totWeightAct, pTotals.totWeight);
+                const volPlanDisp = typeof totals.totVolPlan === 'number' ? formatVolumeId(totals.totVolPlan) : '—';
+                const volActDisp = typeof totals.totVolAct === 'number' ? formatVolumeId(totals.totVolAct) : '—';
+                const dev = totals.totWeightAct - totals.totWeightPlan;
+                const achVal = calculateAchievement(totals.totWeightAct, totals.totWeightPlan);
                 const achDisp = formatPercentId(achVal);
 
                 filteredCount++;
                 tbody.innerHTML += `<tr class="bg-slate-100 font-bold border-b border-slate-300">
                     <td class="p-2.5 text-center">${filteredCount}</td>
-                    <td class="p-2.5">${kPlan.name}</td>
-                    <td class="p-2.5 text-center">${pTotals.satuan}</td>
+                    <td class="p-2.5">${plan.name}</td>
+                    <td class="p-2.5 text-center">${totals.satuan}</td>
                     <td class="p-2.5 text-center">${volPlanDisp}</td>
                     <td class="p-2.5 text-center">${volActDisp}</td>
-                    <td class="p-2.5 text-right">${formatRp(pTotals.totCost)}</td>
-                    <td class="p-2.5 text-right">${formatRp(actTotals.totCostAct)}</td>
-                    <td class="p-2.5 text-center text-primary-700">${formatWeightId(pTotals.totWeight)}</td>
-                    <td class="p-2.5 text-center text-emerald-700">${formatWeightId(actTotals.totWeightAct)}</td>
+                    <td class="p-2.5 text-right">${formatRp(totals.totCostPlan)}</td>
+                    <td class="p-2.5 text-right">${formatRp(totals.totCostAct)}</td>
+                    <td class="p-2.5 text-center text-primary-700">${formatWeightId(totals.totWeightPlan)}</td>
+                    <td class="p-2.5 text-center text-emerald-700">${formatWeightId(totals.totWeightAct)}</td>
                     <td class="p-2.5 text-center ${dev >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${dev >= 0 ? '+' : ''}${formatWeightId(dev)}</td>
                     <td class="p-2.5 text-center text-blue-700 bg-blue-50/40">${achDisp}</td>
                 </tr>`;
 
-                if (kPlan.subtasks) {
-                    kPlan.subtasks.forEach((sub, sIdx) => {
-                        if (searchQuery !== "" && !kPlan.name.toLowerCase().includes(searchQuery) && !sub.name.toLowerCase().includes(searchQuery)) return;
-                        const subTotals = calculateKurvaSubtaskTotals(sub, krWeeksList);
-                        
-                        let subActTotals = { totVolAct: 0, totCostAct: 0, totWeightAct: 0, totWeightPlan: 0 };
-                        if (matchingActPlan && matchingActPlan.subtasks) {
-                            const actSub = matchingActPlan.subtasks[sIdx] || matchingActPlan.subtasks.find(as => as.name.toLowerCase() === sub.name.toLowerCase());
-                            if (actSub) {
-                                subActTotals = calculateSubtaskTotals(actSub, weeksList);
-                            }
-                        }
-                        const subDev = subActTotals.totWeightAct - subTotals.totWeight;
-                        const subAchVal = calculateAchievement(subActTotals.totWeightAct, subTotals.totWeight);
+                if (plan.subtasks) {
+                    plan.subtasks.forEach((sub, sIdx) => {
+                        if (searchQuery !== "" && !plan.name.toLowerCase().includes(searchQuery) && !sub.name.toLowerCase().includes(searchQuery)) return;
+                        const subTotals = calculateSubtaskTotals(sub, weeksList);
+                        const subDev = subTotals.totWeightAct - subTotals.totWeightPlan;
+                        const subAchVal = calculateAchievement(subTotals.totWeightAct, subTotals.totWeightPlan);
                         const subAchDisp = formatPercentId(subAchVal);
 
                         tbody.innerHTML += `<tr class="subtask-row text-xs border-b border-slate-200">
                             <td class="p-2.5 text-center bg-slate-50">${filteredCount}.${sIdx + 1}</td>
                             <td class="p-2.5 pl-8 bg-slate-50">↳ ${sub.name}</td>
                             <td class="p-2.5 text-center bg-slate-50">${sub.satuan}</td>
-                            <td class="p-2.5 text-center">${formatVolumeId(subTotals.totVol)}</td>
-                            <td class="p-2.5 text-center">${formatVolumeId(subActTotals.totVolAct)}</td>
-                            <td class="p-2.5 text-right">${formatRp(subTotals.totCost)}</td>
-                            <td class="p-2.5 text-right">${formatRp(subActTotals.totCostAct)}</td>
-                            <td class="p-2.5 text-center font-semibold text-primary-600">${formatWeightId(subTotals.totWeight)}</td>
-                            <td class="p-2.5 text-center font-semibold text-emerald-600">${formatWeightId(subActTotals.totWeightAct)}</td>
+                            <td class="p-2.5 text-center">${formatVolumeId(subTotals.totVolPlan)}</td>
+                            <td class="p-2.5 text-center">${formatVolumeId(subTotals.totVolAct)}</td>
+                            <td class="p-2.5 text-right">${formatRp(subTotals.totCostPlan)}</td>
+                            <td class="p-2.5 text-right">${formatRp(subTotals.totCostAct)}</td>
+                            <td class="p-2.5 text-center font-semibold text-primary-600">${formatWeightId(subTotals.totWeightPlan)}</td>
+                            <td class="p-2.5 text-center font-semibold text-emerald-600">${formatWeightId(subTotals.totWeightAct)}</td>
                             <td class="p-2.5 text-center font-semibold ${subDev >= 0 ? 'text-emerald-600' : 'text-rose-600'}">${subDev >= 0 ? '+' : ''}${formatWeightId(subDev)}</td>
                             <td class="p-2.5 text-center text-blue-700 bg-blue-50/20">${subAchDisp}</td>
                         </tr>`;
@@ -1895,19 +1710,12 @@
                 const wKey = `W${idx + 1}`;
                 let wCostPlan = 0, wCostAct = 0, wWeightPlan = 0, wWeightAct = 0;
 
-                krPlans.forEach(p => {
+                activePlans.forEach(p => {
                     if (p.subtasks) {
                         p.subtasks.forEach(s => {
-                            wCostPlan += parseFloat((s.weeks && s.weeks[wKey] && s.weeks[wKey].cost) || 0);
-                            wWeightPlan += parseFloat((s.weeks && s.weeks[wKey] && s.weeks[wKey].weight) || 0);
-                        });
-                    }
-                });
-
-                actPlans.forEach(p => {
-                    if (p.subtasks) {
-                        p.subtasks.forEach(s => {
+                            wCostPlan += parseFloat((s.weeksPlan && s.weeksPlan[wKey] && s.weeksPlan[wKey].cost) || 0);
                             wCostAct += parseFloat((s.weeksActual && s.weeksActual[wKey] && s.weeksActual[wKey].cost) || 0);
+                            wWeightPlan += parseFloat((s.weeksPlan && s.weeksPlan[wKey] && s.weeksPlan[wKey].weight) || 0);
                             wWeightAct += parseFloat((s.weeksActual && s.weeksActual[wKey] && s.weeksActual[wKey].weight) || 0);
                         });
                     }
@@ -2189,34 +1997,25 @@
             const divisiSel = document.getElementById('modal-plan-divisi');
             const picSel = document.getElementById('modal-plan-pic');
 
-            const krYearSel = document.getElementById('modal-kr-year');
-            const krMonthSel = document.getElementById('modal-kr-month');
-            const krDivisiSel = document.getElementById('modal-kr-divisi');
-            const krPicSel = document.getElementById('modal-kr-pic');
+            if (yearSel) {
+                yearSel.innerHTML = '';
+                for (let y = 2026; y <= 2030; y++) yearSel.innerHTML += `<option value="${y}">Tahun ${y}</option>`;
+            }
 
-            [yearSel, krYearSel].forEach(el => {
-                if (!el) return;
-                el.innerHTML = '';
-                for (let y = 2026; y <= 2030; y++) el.innerHTML += `<option value="${y}">Tahun ${y}</option>`;
-            });
+            if (monthSel) {
+                monthSel.innerHTML = '';
+                MONTH_NAMES.forEach((m, idx) => monthSel.innerHTML += `<option value="${idx}">${m}</option>`);
+            }
 
-            [monthSel, krMonthSel].forEach(el => {
-                if (!el) return;
-                el.innerHTML = '';
-                MONTH_NAMES.forEach((m, idx) => el.innerHTML += `<option value="${idx}">${m}</option>`);
-            });
+            if (divisiSel) {
+                divisiSel.innerHTML = '';
+                appState.divisions.forEach(d => divisiSel.innerHTML += `<option value="${d}">${d}</option>`);
+            }
 
-            [divisiSel, krDivisiSel].forEach(el => {
-                if (!el) return;
-                el.innerHTML = '';
-                appState.divisions.forEach(d => el.innerHTML += `<option value="${d}">${d}</option>`);
-            });
-
-            [picSel, krPicSel].forEach(el => {
-                if (!el) return;
-                el.innerHTML = '';
-                appState.pics.forEach(p => el.innerHTML += `<option value="${p}">${p}</option>`);
-            });
+            if (picSel) {
+                picSel.innerHTML = '';
+                appState.pics.forEach(p => picSel.innerHTML += `<option value="${p}">${p}</option>`);
+            }
         }
 
         window.addModalSubtaskRow = function() {
@@ -2296,126 +2095,9 @@
         };
 
         window.deletePlan = async function(planId) {
-            if (confirm('Hapus Action Plan ini dari Cloud?')) {
+            if (confirm('Apakah Anda yakin ingin menghapus Action Plan ini? Tindakan ini akan memperbarui konsistensi data pada seluruh panel terkait secara otomatis.')) {
                 showSavingStatus(true);
                 await deleteDoc(doc(db, 'action_plans', planId));
-                showSavingStatus(false);
-            }
-        };
-
-        window.openKurvaRencanaModal = function(planId = null) {
-            populateModalDropdowns();
-            const modal = document.getElementById('kurva-rencana-modal');
-            document.getElementById('kurva-rencana-form').reset();
-
-            if (planId) {
-                const plan = appState.kurvaRencanaPlans.find(p => p.id === planId);
-                if (plan) {
-                    document.getElementById('kurva-rencana-modal-title').textContent = 'Edit Action Plan (Rencana Kurva S)';
-                    document.getElementById('modal-kr-id').value = plan.id;
-                    document.getElementById('modal-kr-year').value = plan.year;
-                    document.getElementById('modal-kr-month').value = plan.month;
-                    document.getElementById('modal-kr-satuan').value = plan.satuan || '';
-                    document.getElementById('modal-kr-name').value = plan.name;
-                    document.getElementById('modal-kr-divisi').value = plan.divisi;
-                    document.getElementById('modal-kr-pic').value = plan.pic;
-                    document.getElementById('modal-kr-uraian').value = plan.uraian || '';
-                    currentModalKurvaSubtasks = JSON.parse(JSON.stringify(plan.subtasks || []));
-                }
-            } else {
-                document.getElementById('kurva-rencana-modal-title').textContent = 'Tambah Action Plan Baru (Rencana Kurva S)';
-                document.getElementById('modal-kr-id').value = '';
-                document.getElementById('modal-kr-year').value = appState.globalYear;
-                document.getElementById('modal-kr-month').value = (appState.globalMonth === 'ALL') ? 0 : appState.globalMonth;
-                currentModalKurvaSubtasks = [];
-            }
-
-            renderModalKurvaSubtasksList();
-            modal.classList.remove('hidden');
-        };
-
-        window.closeKurvaRencanaModal = function() {
-            document.getElementById('kurva-rencana-modal').classList.add('hidden');
-        };
-
-        window.addModalKurvaSubtaskRow = function() {
-            const year = parseInt(document.getElementById('modal-kr-year').value || appState.globalYear);
-            const month = parseInt(document.getElementById('modal-kr-month').value || 0);
-            const weeksList = getKurvaRencanaWeeksList(year, month);
-
-            const newSubId = `kr-sub-${Date.now()}-${currentModalKurvaSubtasks.length + 1}`;
-            const weeks = {};
-            weeksList.forEach((_, idx) => {
-                weeks[`W${idx + 1}`] = { vol: 0, cost: 0, weight: 0 };
-            });
-
-            currentModalKurvaSubtasks.push({
-                id: newSubId,
-                name: `Sub Pekerjaan Kurva S ${currentModalKurvaSubtasks.length + 1}`,
-                satuan: 'M2',
-                weeks
-            });
-
-            renderModalKurvaSubtasksList();
-        };
-
-        window.removeModalKurvaSubtaskRow = function(subId) {
-            currentModalKurvaSubtasks = currentModalKurvaSubtasks.filter(s => s.id !== subId);
-            renderModalKurvaSubtasksList();
-        };
-
-        function renderModalKurvaSubtasksList() {
-            const container = document.getElementById('modal-kr-subtasks-list-container');
-            container.innerHTML = '';
-
-            currentModalKurvaSubtasks.forEach((sub, sIdx) => {
-                container.innerHTML += `<div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-xs">Sub Pekerjaan Kurva S #${sIdx + 1}</span>
-                        <button type="button" onclick="removeModalKurvaSubtaskRow('${sub.id}')" class="text-rose-600 text-xs">Hapus</button>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <input type="text" value="${sub.name}" onchange="updateModalKurvaSubtaskField('${sub.id}', 'name', this.value)" class="col-span-2 px-2 py-1 border rounded text-xs" placeholder="Nama Sub">
-                        <input type="text" value="${sub.satuan}" onchange="updateModalKurvaSubtaskField('${sub.id}', 'satuan', this.value)" class="px-2 py-1 border rounded text-xs" placeholder="Satuan">
-                    </div>
-                </div>`;
-            });
-        }
-
-        window.updateModalKurvaSubtaskField = function(subId, field, val) {
-            const sub = currentModalKurvaSubtasks.find(s => s.id === subId);
-            if (sub) sub[field] = val;
-        };
-
-        window.saveKurvaRencanaModal = async function(e) {
-            e.preventDefault();
-            showSavingStatus(true);
-            const id = document.getElementById('modal-kr-id').value;
-            const year = parseInt(document.getElementById('modal-kr-year').value);
-            const month = parseInt(document.getElementById('modal-kr-month').value);
-            const satuan = document.getElementById('modal-kr-satuan').value;
-            const name = document.getElementById('modal-kr-name').value;
-            const divisi = document.getElementById('modal-kr-divisi').value;
-            const pic = document.getElementById('modal-kr-pic').value;
-            const uraian = document.getElementById('modal-kr-uraian').value;
-
-            const planId = id || `kr-plan-${Date.now()}`;
-            const planData = {
-                id: planId, year, month, name, satuan, divisi, pic, uraian,
-                subtasks: currentModalKurvaSubtasks,
-                updatedAt: serverTimestamp(),
-                updatedBy: currentUser.uid
-            };
-
-            await setDoc(doc(db, 'kurva_rencana_plans', planId), planData);
-            closeKurvaRencanaModal();
-            showSavingStatus(false);
-        };
-
-        window.deleteKurvaRencanaPlan = async function(planId) {
-            if (confirm('Hapus Action Plan Rencana Kurva S ini dari Cloud?')) {
-                showSavingStatus(true);
-                await deleteDoc(doc(db, 'kurva_rencana_plans', planId));
                 showSavingStatus(false);
             }
         };
